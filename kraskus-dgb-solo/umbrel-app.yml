@@ -3,7 +3,7 @@ manifestVersion: 1
 id: kraskus-dgb-solo
 name: DigiByte
 tagline: DigiByte full node, backed-up wallet, and true solo mining on SHA-256, Scrypt and Skein
-icon: https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Crypto-Store/60dba4233de71aba97b8a2fd31df740b631ef2a1/kraskus-dgb-solo/assets/dgb-emblem.png
+icon: https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Umbrel-Store/main/kraskus-dgb-solo/assets/dgb-emblem.png
 category: Mining
 version: 0.1.1
 port: 33071

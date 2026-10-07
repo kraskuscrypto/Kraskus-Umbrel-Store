@@ -6,7 +6,8 @@ modules/lan-ingress, legacy-compat/app-script) plus Kraskus policy:
   * Umbrel login is the platform auth boundary: no app may set PROXY_AUTH_ADD=false
   * no hard GPU reservations; GPU only through permissions: [GPU]
 
-usage: validate.py <store-dir> [<store-dir> ...] [--offline]
+usage: validate.py <store-dir> [<store-dir> ...] [--published]
+  (store-dir basename must be the GitHub repo name; --published fetches the live icons)
 exit 1 on any ERROR.
 """
 import os
@@ -39,7 +40,7 @@ KNOWN_KEYS = set(REQUIRED) | set(OPTIONAL) | {
     "widgets", "defaultShell", "implements", "backupIgnore", "storage", "folderAccess", "environment"}
 PERMISSIONS = {"GPU", "STORAGE_DOWNLOADS"}
 
-OFFLINE = "--offline" in sys.argv
+PUBLISHED = "--published" in sys.argv  # also fetch icons from GitHub and compare with the repo files
 errors, warnings = [], []
 
 
@@ -75,19 +76,34 @@ def host_ports(svc):
     return out
 
 
-def check_icon(where, url):
+def is_image(head):
+    return (head.startswith(b"\x89PNG") or head.lstrip().startswith(b"<svg") or head.startswith(b"<?xml")
+            or head[:3] == b"\xff\xd8\xff")
+
+
+def check_icon(where, url, root, store_repo):
     if not URL.match(url) or not url.startswith("https://"):
         err(where, f"icon must be an absolute https URL, got {url!r}")
         return
-    if OFFLINE:
+    # Icons are hosted in the store's own repo: the URL must point there and the file must ship in it.
+    prefix = f"https://raw.githubusercontent.com/kraskuscrypto/{store_repo}/main/"
+    if not url.startswith(prefix):
+        err(where, f"icon must be served from this store repo ({prefix}...), got {url}")
+        return
+    local = os.path.join(root, url[len(prefix):])
+    if not os.path.isfile(local):
+        err(where, f"icon file {url[len(prefix):]} is not in the store repo")
+        return
+    if not is_image(open(local, "rb").read(16)):
+        err(where, f"icon file {url[len(prefix):]} is not an image")
+    if not PUBLISHED:
         return
     try:
         req = urllib.request.Request(url, headers={"User-Agent": "kraskus-umbrel-validate"})
         with urllib.request.urlopen(req, timeout=20) as r:
-            body = r.read(16)
-            if r.status != 200 or not (body.startswith(b"\x89PNG") or body.lstrip().startswith(b"<svg")
-                                       or body.startswith(b"<?xml") or body[:3] == b"\xff\xd8\xff"):
-                err(where, f"icon {url} -> HTTP {r.status}, not an image")
+            body = r.read()
+            if r.status != 200 or body != open(local, "rb").read():
+                err(where, f"published icon {url} -> HTTP {r.status}, differs from the repo file")
     except Exception as e:  # noqa: BLE001
         err(where, f"icon {url} unreachable: {e}")
 
@@ -125,7 +141,7 @@ def validate_store(root):
         for k, t in OPTIONAL.items():
             if k in m and not isinstance(m[k], t):
                 err(w, f"{k} has wrong type {type(m[k]).__name__}")
-        for k in ("name", "tagline", "description"):
+        for k in ("name", "tagline", "description", "releaseNotes"):
             hit = re.search(r"5tratum|5stratum|workbench|cannot install", str(m.get(k, "")), re.I)
             if hit:
                 warn(w, f"{k} has 5tratumOS-specific wording ({hit.group(0)!r}); add Umbrel copy in overrides.yml")
@@ -150,7 +166,7 @@ def validate_store(root):
         if "icon" not in m:
             err(w, "icon missing (Umbrel would fall back to the official gallery URL)")
         else:
-            check_icon(w, m["icon"])
+            check_icon(w, m["icon"], root, name)
         port = m.get("port")
         if isinstance(port, int):
             if not 1024 <= port <= 65535 or port in UMBREL_RESERVED or port >= GATEWAY_HIDDEN_BASE and port < GATEWAY_HIDDEN_BASE + 1000:

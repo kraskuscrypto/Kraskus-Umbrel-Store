@@ -1,12 +1,120 @@
-# Umbrel-only store-listing copy, applied by generate.py to every Umbrel store.
+# Umbrel store-listing copy, applied by generate.py to every Umbrel store.
+#
 # Allowed fields: name, tagline, description, releaseNotes. IDs, versions, ports
 # and everything else always come from the 5tratumOS source manifest.
 #
-# OWNER COPY NEEDED before publishing: validate.py warns on every manifest whose
-# text still mentions 5tratumOS/Workbench or says the app "cannot install".
-#
-# Example:
-# kraskus-kaspa-solo:
-#   description: >-
-#     Kaspa by Kraskus turns your Umbrel into ...
-{}
+# `replaces` lists the fingerprints of the source copy (name, tagline,
+# description) this text was written against. When the source copy changes,
+# generation stops until the Umbrel copy here has been reviewed and the new
+# fingerprint added. Copy must stay platform-neutral: no 5tratumOS/Workbench
+# wording (validate.py enforces this).
+
+kraskus-bsv-solo:
+  replaces: [a694c832a4af02a2]
+  description: >-
+    Bitcoin Satoshi Vision runs a self-contained BSV mainnet node (SV Node 1.2.2,
+    pruned, 10 GB excessive block size) and a native GMC-to-Stratum V1 solo-mining
+    controller on port 1922. The Kraskus interface shows node synchronization, one
+    truthful mining-readiness state, workers, shares and blocks confirmed by the node.
+    Miners are refused until the node is synchronized and a valid payout is
+    configured. The built-in wallet receives mining payouts once you have downloaded
+    and verified an encrypted backup of the complete wallet file; the same backup
+    restores the exact wallet on any install. Sending from the built-in wallet is not
+    available. A required 1% developer fee is paid directly from each successful
+    block coinbase.
+
+kraskus-chta-solo:
+  replaces: [e6d60d2983b5ef87]
+  description: >-
+    CHTA Kraskus runs a self-contained CheetahCoin full node and solo-mining
+    appliance. The Kraskus interface shows node synchronization, one truthful
+    mining-readiness state, each Stratum port's live status, workers, accepted and
+    rejected shares, round progress, and blocks independently confirmed by the node.
+    Normal miners connect on port 1926; NMMiner and other very-low-hash devices use
+    port 1927 with a fixed 0.002 difficulty. Both ports stay closed until the node is
+    synchronized and a valid payout is configured. The built-in CheetahCoin wallet
+    can receive, send and act as the mining payout once you have downloaded and
+    verified an encrypted backup of the complete wallet file; the same backup
+    restores the exact wallet on any CHTA Kraskus install. A required 1% developer
+    fee is paid directly from successful block coinbases.
+
+kraskus-common-foundry-gpu-miner:
+  replaces: [f07c9c4c58adeb27]
+  description: >-
+    Mines Common Foundry on a supported NVIDIA GPU with the official v1.0.8 miner,
+    unmodified, behind the Kraskus interface (CMFD Kraskus). The app downloads and
+    authenticates its own copy of the 6.4 GB ForgeMatrix model bank, mines to the
+    pool you choose and pays out to the Common Foundry address you enter. It holds
+    no wallet and never asks for a passphrase. Mining requires an NVIDIA GPU with the
+    NVIDIA driver loaded on the host; the app asks for GPU access when you install
+    it. Works with or without the Common Foundry node app. Pool mining only. No
+    developer fee.
+
+kraskus-kaspa-solo:
+  replaces: [85a8f599948d440d]
+  description: >-
+    Kaspa by Kraskus runs an easy-to-use Kaspa full node and local solo mining
+    appliance on your own hardware. The app manages node synchronization, mining
+    readiness, worker connections, a real native Kaspa wallet, and confirmed block
+    detection from a single interface. Normal users do not need to manage kaspad,
+    RPC, Docker, Linux, JSON, or Stratum configuration. An automatic 1% developer fee
+    applies only to successfully mined block rewards after coinbase maturity; miner
+    hashrate is never diverted.
+
+kraskus-prl-solo:
+  replaces: [af103adef89ddb0a]
+  description: >-
+    Pearl by Kraskus runs a real Pearl v1.4.8 mainnet node, native Oyster wallet,
+    Kraskus Pearl Stratum gateway, and the Kraskus interface. Truthful readiness
+    (mining opens only once the node is synced and the wallet's recovery phrase is
+    backed up), wallet create, backup, restore and forget, a verified found-blocks
+    ledger, live worker/share telemetry, and a fixed required 1.00% developer-fee
+    coinbase split on successfully mined blocks.
+
+kraskus-quantus-solo:
+  replaces: [cdba319319a5d82a]
+  description: >-
+    Quantus Solo runs a Quantus mainnet full node on your own hardware and lets your
+    Quantus miners on the local network mine to your own wormhole reward address.
+    You import the reward address and its inner hash; the app checks that they
+    belong together and never asks for your 24 words. An optional local CPU miner is
+    included for testing only; it is not profitable on mainnet. No developer fee.
+    Upstream telemetry is turned off.
+
+kraskus-xmr-solo:
+  replaces: [472d2a27ba78ebc4]
+  description: >-
+    Monero by Kraskus runs a self-contained Monero node, wallet, and true solo mining
+    appliance. XMRig connects to a RandomX Stratum endpoint on port 1921, with real
+    worker, share, hashrate, and submitted-difficulty telemetry while only
+    network-valid blocks are forwarded to the local monerod. Wallet state and
+    blockchain data remain in the app's persistent storage. An automatic 1% developer
+    fee applies only to successfully mined block rewards after 60-block maturity;
+    miner hashrate is never diverted.
+
+kraskus-zec-solo:
+  replaces: [96e77c205182a699]
+  description: >-
+    Kraskus ZEC Solo runs an easy-to-use Zcash full node and local solo mining
+    appliance on your own hardware. The app manages node synchronization, mining
+    readiness, worker connections, mining jobs, and block submissions from a single
+    interface. Normal users do not need to manage Zebra, RPC, Docker, Linux, JSON, or
+    Stratum configuration.
+
+mysterium-node:
+  replaces: [f34455c02271538f]
+  tagline: Official MystNodes node with a Kraskus control center
+  description: >-
+    MystNodes by Kraskus installs and runs the official upstream Mysterium node
+    container while preserving the node identity in the app's persistent storage.
+    The Kraskus onboarding experience guides new users through a disclosed MystNodes
+    referral signup path, while existing MystNodes users can bypass signup and go
+    directly to the official Node UI with their own account and API key. A responsive
+    control center shows read-only snapshots from the local Mysterium API. The
+    underlying node software is provided by Mysterium Network. Participation may
+    expose the host's residential IP to third-party traffic; review Mysterium's terms
+    and enable only service types appropriate for your location and risk tolerance.
+  releaseNotes: >-
+    Throttles provider-quality and analytics polling to protect the upstream
+    Mysterium quality API from dashboard-driven rate limits, spaces provider
+    requests, prevents retry storms, and updates the official node runtime to 1.39.7.

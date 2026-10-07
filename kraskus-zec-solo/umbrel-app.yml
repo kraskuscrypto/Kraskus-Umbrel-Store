@@ -3,11 +3,11 @@ manifestVersion: 1
 id: kraskus-zec-solo
 name: Zcash by Kraskus
 tagline: Zcash full node and solo mining pool
-icon: https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Crypto-Store/60dba4233de71aba97b8a2fd31df740b631ef2a1/kraskus-zec-solo/assets/zec-emblem-std-v2.png
+icon: https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Umbrel-Store/main/kraskus-zec-solo/assets/zec-emblem-std-v2.png
 category: Mining
 version: 0.4.0
 port: 33062
-description: Kraskus ZEC Solo turns 5tratumOS into an easy-to-use Zcash full node and local solo mining appliance. The app manages node synchronization, mining readiness, worker connections, mining jobs, and block submissions from a single interface. Normal users do not need to manage Zebra, RPC, Docker, Linux, JSON, or Stratum configuration.
+description: Kraskus ZEC Solo runs an easy-to-use Zcash full node and local solo mining appliance on your own hardware. The app manages node synchronization, mining readiness, worker connections, mining jobs, and block submissions from a single interface. Normal users do not need to manage Zebra, RPC, Docker, Linux, JSON, or Stratum configuration.
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
 repo: https://github.com/kraskuscrypto/Kraskus-Crypto-Apps

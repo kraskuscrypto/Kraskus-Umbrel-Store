@@ -3,7 +3,7 @@ manifestVersion: 1
 id: kraskus-btc-blake2b-solo
 name: BTC2b by Kraskus
 tagline: BTC2b Bitcoin Knots node, backed-up wallet, and true solo mining
-icon: https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Crypto-Store/60dba4233de71aba97b8a2fd31df740b631ef2a1/kraskus-btc-blake2b-solo/assets/btc2b-emblem-std-v3.png
+icon: https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Umbrel-Store/main/kraskus-btc-blake2b-solo/assets/btc2b-emblem-std-v3.png
 category: Mining
 version: 0.2.5
 port: 33066

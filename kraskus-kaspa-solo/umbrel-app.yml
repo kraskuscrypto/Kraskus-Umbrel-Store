@@ -3,11 +3,11 @@ manifestVersion: 1
 id: kraskus-kaspa-solo
 name: Kaspa by Kraskus
 tagline: Kaspa full node and solo mining node
-icon: https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Crypto-Store/60dba4233de71aba97b8a2fd31df740b631ef2a1/kraskus-kaspa-solo/assets/kaspa-emblem-std-v2.png
+icon: https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Umbrel-Store/main/kraskus-kaspa-solo/assets/kaspa-emblem-std-v2.png
 category: Mining
 version: 0.3.1
 port: 33067
-description: Kaspa by Kraskus turns 5tratumOS into an easy-to-use Kaspa full node and local solo mining appliance. The app manages node synchronization, mining readiness, worker connections, a real native Kaspa wallet, and confirmed block detection from a single interface. Normal users do not need to manage kaspad, RPC, Docker, Linux, JSON, or Stratum configuration. An automatic 1% developer fee applies only to successfully mined block rewards after coinbase maturity; miner hashrate is never diverted.
+description: Kaspa by Kraskus runs an easy-to-use Kaspa full node and local solo mining appliance on your own hardware. The app manages node synchronization, mining readiness, worker connections, a real native Kaspa wallet, and confirmed block detection from a single interface. Normal users do not need to manage kaspad, RPC, Docker, Linux, JSON, or Stratum configuration. An automatic 1% developer fee applies only to successfully mined block rewards after coinbase maturity; miner hashrate is never diverted.
 developer: Kraskus Crypto
 website: https://kraskuscrypto.com/
 repo: https://github.com/kraskuscrypto/Kraskus-Mining-Platform
