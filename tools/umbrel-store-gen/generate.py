@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""Generate the Umbrel-native Kraskus stores from the 5tratumOS store repos.
+
+The 5tratumOS stores (Kraskus-Crypto-Store / Kraskus-Crypto-Dev-Store) stay the
+source of truth and are never modified. For every app this writes:
+
+  <app>/umbrel-app.yml      5tratstore-app.yml minus 5tratumOS-only keys, plus
+                            manifestVersion: 1, gallery: [] and an absolute icon URL
+  <app>/docker-compose.yml  byte-for-byte copy, except the GPU miner's hard NVIDIA
+                            reservation, which Umbrel re-adds via permissions: [GPU]
+  <app>/...                 every other package file, byte-for-byte
+
+plus a root umbrel-app-store.yml and generated-from.json (source commit).
+App IDs are never changed.
+
+usage: generate.py <output-root>   (writes <output-root>/<store repo name>/)
+"""
+import io
+import json
+import os
+import shutil
+import subprocess
+import sys
+import tarfile
+
+import yaml
+
+GENERATOR_VERSION = "1.0.0"
+KRASKUS = "D:/Kraskus"
+SOURCES = {
+    "main": ("Kraskus-Crypto-Store", f"{KRASKUS}/Kraskus-Crypto-Store"),
+    "dev": ("Kraskus-Crypto-Dev-Store", f"{KRASKUS}/Kraskus-Crypto-Dev-Store"),
+}
+SOURCE_REF = "origin/main"
+
+# store repo -> (store id, store name, source channel, app filter)
+STORES = {
+    "Kraskus-Umbrel-Store": ("kraskus", "Kraskus Crypto", "main", lambda app: app != "mysterium-node"),
+    "Kraskus-Umbrel-Dev-Store": ("kraskus", "Kraskus Crypto (Dev)", "dev", lambda app: app != "mysterium-node"),
+    "Kraskus-Umbrel-Mysterium-Store": ("mysterium", "MystNodes by Kraskus", "main", lambda app: app == "mysterium-node"),
+}
+
+GPU_APPS = {"kraskus-common-foundry-gpu-miner"}
+
+# 5tratumOS-only manifest keys with no Umbrel meaning.
+DROP_KEYS = {"services", "uiMode"}
+# Umbrel manifest key order (matches upstream umbrel-apps convention).
+KEY_ORDER = ["manifestVersion", "id", "name", "tagline", "icon", "category", "version", "port", "description",
+             "developer", "website", "repo", "support", "gallery", "releaseNotes", "dependencies", "permissions",
+             "path", "defaultUsername", "defaultPassword", "submitter", "submission"]
+SKIP_FILES = {"5tratstore-app.yml", "5tratstore-review.yml"}
+
+
+def git(repo, *args, binary=False):
+    r = subprocess.run(["git", "-C", repo, *args], capture_output=True, check=True)
+    return r.stdout if binary else r.stdout.decode("utf-8")
+
+
+def list_apps(repo):
+    files = git(repo, "ls-tree", "-r", "--name-only", SOURCE_REF).splitlines()
+    return sorted({f.split("/")[0] for f in files
+                   if f.count("/") == 1 and f.endswith("/5tratstore-app.yml") and not f.startswith("templates/")})
+
+
+def extract_app(repo, app, dest):
+    data = git(repo, "archive", "--format=tar", SOURCE_REF, app, binary=True)
+    with tarfile.open(fileobj=io.BytesIO(data)) as t:
+        members = [m for m in t.getmembers() if os.path.basename(m.name) not in SKIP_FILES]
+        t.extractall(dest, members=members, filter="tar")
+
+
+def raw_url(source_name, commit, path):
+    return f"https://raw.githubusercontent.com/kraskuscrypto/{source_name}/{commit}/{path}"
+
+
+OVERRIDES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "overrides.yml")
+# Only store-listing copy may be overridden; IDs, versions and ports always come from the source.
+OVERRIDABLE = {"name", "tagline", "description", "releaseNotes"}
+
+
+def load_overrides():
+    if not os.path.exists(OVERRIDES_FILE):
+        return {}
+    data = yaml.safe_load(open(OVERRIDES_FILE, encoding="utf-8")) or {}
+    for app, fields in data.items():
+        bad = set(fields or {}) - OVERRIDABLE
+        if bad:
+            raise SystemExit(f"overrides.yml: {app}: only {sorted(OVERRIDABLE)} may be overridden, not {sorted(bad)}")
+    return data
+
+
+def build_manifest(src, app, icon_url, gpu, overrides=None):
+    m = {k: v for k, v in src.items() if k not in DROP_KEYS}
+    m.update(overrides or {})
+    assert m["id"] == app, f"{app}: manifest id {m['id']!r} != directory"
+    m["manifestVersion"] = 1
+    m["icon"] = icon_url
+    m.setdefault("gallery", [])
+    if gpu:
+        m["permissions"] = sorted(set(m.get("permissions") or []) | {"GPU"})
+    ordered = {k: m[k] for k in KEY_ORDER if k in m}
+    ordered.update({k: v for k, v in m.items() if k not in ordered})
+    return ordered
+
+
+def strip_nvidia_reservation(compose_text, app):
+    """Remove the hard `deploy: resources: reservations: devices: - driver: nvidia` block.
+
+    Text-level so every comment and the rest of the file stay byte-identical;
+    the caller verifies the parsed result differs only by that block.
+    """
+    lines = compose_text.split("\n")
+    out, i, removed = [], 0, 0
+    while i < len(lines):
+        line = lines[i]
+        if line.strip() == "deploy:":
+            indent = len(line) - len(line.lstrip())
+            j = i + 1
+            while j < len(lines) and (not lines[j].strip() or len(lines[j]) - len(lines[j].lstrip()) > indent):
+                j += 1
+            block = "\n".join(lines[i:j])
+            if "driver: nvidia" in block:
+                # keep trailing blank/comment-free spacing intact
+                while j > i + 1 and not lines[j - 1].strip():
+                    j -= 1
+                i = j
+                removed += 1
+                continue
+        out.append(line)
+        i += 1
+    if removed != 1:
+        raise SystemExit(f"{app}: expected exactly one NVIDIA deploy block, found {removed}")
+    return "\n".join(out)
+
+
+def check_gpu_strip(before, after, app):
+    b, a = yaml.safe_load(before), yaml.safe_load(after)
+    for name, svc in b["services"].items():
+        devs = (((svc.get("deploy") or {}).get("resources") or {}).get("reservations") or {}).get("devices") or []
+        if any(d.get("driver") == "nvidia" for d in devs):
+            assert set(svc["deploy"]) == {"resources"}, f"{app}/{name}: deploy has more than the GPU reservation"
+            svc.pop("deploy")
+    assert a == b, f"{app}: compose changed beyond the NVIDIA reservation"
+
+
+def main(out_root):
+    commits = {ch: git(path, "rev-parse", SOURCE_REF).strip() for ch, (_, path) in SOURCES.items()}
+    overrides = load_overrides()
+    report = {}
+    for store_repo, (store_id, store_name, channel, wanted) in STORES.items():
+        source_name, source_path = SOURCES[channel]
+        commit = commits[channel]
+        root = os.path.join(out_root, store_repo)
+        os.makedirs(root, exist_ok=True)
+        # Regenerate app dirs only; keep .git, tools/, README etc.
+        for entry in os.listdir(root):
+            p = os.path.join(root, entry)
+            if os.path.isdir(p) and os.path.exists(os.path.join(p, "umbrel-app.yml")):
+                shutil.rmtree(p)
+        with open(os.path.join(root, "umbrel-app-store.yml"), "w", encoding="utf-8", newline="\n") as f:
+            f.write(f'id: "{store_id}"\nname: "{store_name}"\n')
+
+        apps = [a for a in list_apps(source_path) if wanted(a)]
+        report[store_repo] = []
+        for app in apps:
+            extract_app(source_path, app, root)
+            src = yaml.safe_load(git(source_path, "show", f"{SOURCE_REF}:{app}/5tratstore-app.yml"))
+            icon_url = raw_url(source_name, commit, f"{app}/{src['icon']}")
+            gpu = app in GPU_APPS
+            manifest = build_manifest(src, app, icon_url, gpu, overrides.get(app))
+            with open(os.path.join(root, app, "umbrel-app.yml"), "w", encoding="utf-8", newline="\n") as f:
+                f.write("# GENERATED by tools/umbrel-store-gen/generate.py from "
+                        f"{source_name}@{commit[:12]}:{app}/5tratstore-app.yml - do not edit by hand.\n")
+                yaml.safe_dump(manifest, f, sort_keys=False, allow_unicode=True, width=1000)
+            if gpu:
+                cpath = os.path.join(root, app, "docker-compose.yml")
+                before = open(cpath, encoding="utf-8", newline="").read()
+                after = strip_nvidia_reservation(before, app)
+                check_gpu_strip(before, after, app)
+                with open(cpath, "w", encoding="utf-8", newline="") as f:
+                    f.write(after)
+            report[store_repo].append({"id": app, "version": manifest["version"], "gpu": gpu})
+
+        with open(os.path.join(root, "generated-from.json"), "w", encoding="utf-8", newline="\n") as f:
+            json.dump({"generator": GENERATOR_VERSION, "source_repo": f"kraskuscrypto/{source_name}",
+                       "source_ref": SOURCE_REF, "source_commit": commit, "store_id": store_id,
+                       "apps": report[store_repo]}, f, indent=2)
+            f.write("\n")
+    print(json.dumps(report, indent=1))
+
+
+if __name__ == "__main__":
+    main(sys.argv[1])

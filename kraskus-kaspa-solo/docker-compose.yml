@@ -1,0 +1,180 @@
+# 5StratumOS package for Kraskus Kaspa Solo — release package.
+#
+# Self-contained: bundles its own kaspad, exactly like every other first-party
+# Kraskus solo package (kraskus-zec-solo bundles zebra, kraskus-btc-blake2b-solo
+# bundles knots). Command V2's shared kraskus-kaspa-kaspad and the
+# kraskus-kaspa-node network belong to a separate deployment model (VM100's
+# own fleet manager) and are not referenced anywhere in this file.
+#
+# Conventions confirmed against this box's real first-party packages:
+#   - the UI service publishes NO host port itself — app_proxy (platform-managed)
+#     is the only thing bound to the manifest's `port:` (33067), reaching the UI
+#     container over the app's own internal network via APP_HOST/APP_PORT
+#   - only ports with a real external requirement are published to the host:
+#     the miner-facing Stratum port, and kaspad's P2P port (needed for normal
+#     node operation, same as the current working VM100 reference)
+#   - kaspad's own RPC ports (gRPC/borsh/JSON) are internal-only — nothing
+#     outside this package's own containers needs them
+#   - persistent data under ${APP_DATA_DIR}/<subpath>, never a hardcoded /srv path
+#   - app-scoped bridge networks only, no shared/external network of any kind
+#
+# Approved ports for this package: UI 33067 (app_proxy, in 5tratstore-app.yml),
+# Stratum 1900 (host) -> 5556 (bridge internal).
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: ui
+      APP_PORT: 80
+
+  kaspad:
+    # Pinned to the exact digest currently running successfully in production
+    # (kaspad reports version 2.0.1) — official kaspanet image, publicly
+    # pullable, confirmed via the public Docker Hub API. Pruned by default:
+    # no --archival flag, same as the current working VM100 node.
+    image: kaspanet/rusty-kaspad@sha256:db36449e2f41cf33ab7c26683ce390cb71bdea9c403eefd2e740a7d5605bcd8b
+    restart: unless-stopped
+
+    command:
+      - kaspad
+      - --yes
+      - --nologfiles
+      - --disable-upnp
+      - --utxoindex
+      - --rpclisten=0.0.0.0:16110
+      - --rpclisten-borsh=0.0.0.0:17110
+      - --rpclisten-json=0.0.0.0:18110
+
+    volumes:
+      - ${APP_DATA_DIR}/node:/app/data
+
+    # kaspad flushes its database on SIGTERM; compose's default 10 s grace
+    # period is far too short for that and lets `app down`/uninstall SIGKILL
+    # the node mid-flush (observed on VM120, 2026-09-23: "Error while
+    # Stopping ... forcing containers down"). Give it time to shut down cleanly,
+    # but stay inside the 5tratumOS CLI's own 120 s `docker compose down` budget:
+    # a grace longer than that gets the compose client killed instead, which is
+    # worse than compose sending SIGKILL itself (observed on VM120 with 180 s).
+    stop_grace_period: 100s
+
+    # P2P is published — a solo node needs normal network participation to
+    # sync, same as the current working VM100 reference. RPC (16110/17110/18110)
+    # is internal-only: nothing outside this package's own containers needs it,
+    # so it is not published to the host at all.
+    ports:
+      - "16111:16111/tcp"
+
+    networks:
+      - public
+      - internal
+
+  stratum:
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-stratum@sha256:66fb4ac265f12a12a389c3de561fd4544b766187c9f15ebd904355afb51d6043
+    restart: unless-stopped
+
+    command:
+      - /app/stratum-bridge
+      - --config
+      - /config/config.yaml
+      - --node-mode
+      - external
+
+    environment:
+      KRASKUS_SOLO_PAYOUT_FILE: "/run/kraskus/solo-payout-address"
+
+    # No stratum-config.yaml bind mount: 5StratumOS's real installer only
+    # materializes docker-compose.yml/.env for an installed app, not extra
+    # sidecar files that sit next to the compose file in the store repo — a
+    # relative-path bind mount here silently resolved to an empty directory
+    # on a real VM120 install, so config.yaml is now baked into the image at
+    # build time instead (see apps/kaspa-solo/stratum/stratum-config.yaml and
+    # build-solo-bridge-patched.sh).
+    volumes:
+      - ${APP_DATA_DIR}/wallet/.kraskus:/run/kraskus:ro
+
+    ports:
+      - "1900:5556/tcp"
+
+    networks:
+      - public
+      - internal
+
+    depends_on:
+      - kaspad
+
+  adapter:
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-adapter@sha256:ed7b4e9d2e1f1d023879d5c1b42d081184229e244409dfb4c951a4ff20307fb5
+
+    restart: unless-stopped
+
+    environment:
+      KASPA_STRATUM_API: http://stratum:3030
+      LISTEN_PORT: "18420"
+      KASPA_MINER_PORT: "1900"
+      KASPAD_GRPC_ADDR: "kaspad:16110"
+      KASPA_WALLET_API: "http://wallet-api:18422"
+
+    volumes:
+      - ${APP_DATA_DIR}/wallet:/wallet
+
+    # No host port — only "ui" (same "internal" network) talks to this.
+    networks:
+      - internal
+
+    depends_on:
+      - stratum
+      - kaspad
+
+  wallet-api:
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-wallet-api@sha256:c100782d78df0a0cb3d32549e8f0ac775d6d2baad3fe561c9232c95386ac60e0
+
+    restart: unless-stopped
+
+    environment:
+      LISTEN_PORT: "18422"
+      KASPA_NETWORK: "mainnet"
+      KASPA_WALLET_NAME: "kraskus"
+      KASPA_WALLET_SERVER: "ws://kaspad:17110"
+      KRASKUS_DEV_FEE_AUTO_PAY: "false"
+      KRASKUS_SETTLEMENT_ENABLED: "true"
+      KRASKUS_SETTLEMENT_WALLET_NAME: "kraskus-settlement"
+      HOME: "/wallet"
+
+    volumes:
+      - ${APP_DATA_DIR}/wallet:/wallet
+
+    # No host port — only "adapter" talks to this, over "internal".
+    networks:
+      - internal
+
+    depends_on:
+      - kaspad
+
+  ui:
+    image: ghcr.io/kraskuscrypto/kraskus-kaspa-solo-ui@sha256:e1459c20a262305a20f5553ab02468b65144480f8a2669247074fa10c2ee0bca
+
+    restart: unless-stopped
+
+    # No ports: here — app_proxy (above) is the only public entry point,
+    # matching every sibling Kraskus 5tratumOS app. On "public" too (not
+    # published to the host) so the platform's app_proxy — which is not part
+    # of this compose file and lives on its own network — can still reach
+    # this service; a container that lives only on "internal" (internal:
+    # true, no gateway) is unreachable from outside this compose project at
+    # all, confirmed by the clean-install test.
+    networks:
+      - public
+      - internal
+
+    depends_on:
+      - adapter
+
+networks:
+  # Only where miner/node P2P exposure requires it (stratum, kaspad).
+  public:
+    driver: bridge
+  # kaspad/stratum/adapter/wallet-api/ui internal communication. No external
+  # or shared network of any kind — fully app-scoped.
+  internal:
+    driver: bridge
+    internal: true

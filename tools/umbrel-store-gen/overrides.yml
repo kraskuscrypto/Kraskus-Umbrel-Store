@@ -1,0 +1,12 @@
+# Umbrel-only store-listing copy, applied by generate.py to every Umbrel store.
+# Allowed fields: name, tagline, description, releaseNotes. IDs, versions, ports
+# and everything else always come from the 5tratumOS source manifest.
+#
+# OWNER COPY NEEDED before publishing: validate.py warns on every manifest whose
+# text still mentions 5tratumOS/Workbench or says the app "cannot install".
+#
+# Example:
+# kraskus-kaspa-solo:
+#   description: >-
+#     Kaspa by Kraskus turns your Umbrel into ...
+{}

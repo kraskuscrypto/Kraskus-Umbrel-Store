@@ -1,0 +1,44 @@
+{
+  "generator": "1.0.0",
+  "source_repo": "kraskuscrypto/Kraskus-Crypto-Store",
+  "source_ref": "origin/main",
+  "source_commit": "60dba4233de71aba97b8a2fd31df740b631ef2a1",
+  "store_id": "kraskus",
+  "apps": [
+    {
+      "id": "kraskus-btc-blake2b-solo",
+      "version": "0.2.5",
+      "gpu": false
+    },
+    {
+      "id": "kraskus-chta-solo",
+      "version": "0.3.1",
+      "gpu": false
+    },
+    {
+      "id": "kraskus-dgb-solo",
+      "version": "0.1.1",
+      "gpu": false
+    },
+    {
+      "id": "kraskus-kaspa-solo",
+      "version": "0.3.1",
+      "gpu": false
+    },
+    {
+      "id": "kraskus-prl-solo",
+      "version": "0.2.0",
+      "gpu": false
+    },
+    {
+      "id": "kraskus-xmr-solo",
+      "version": "0.1.20",
+      "gpu": false
+    },
+    {
+      "id": "kraskus-zec-solo",
+      "version": "0.4.0",
+      "gpu": false
+    }
+  ]
+}
