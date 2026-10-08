@@ -7,7 +7,9 @@ source of truth and are never modified. For every app this writes:
   <app>/umbrel-app.yml      5tratstore-app.yml minus 5tratumOS-only keys, plus
                             manifestVersion: 1, gallery: [] and an absolute icon URL
   <app>/docker-compose.yml  byte-for-byte copy, except the GPU miner's hard NVIDIA
-                            reservation, which Umbrel re-adds via permissions: [GPU]
+                            reservation, which Umbrel re-adds via permissions: [GPU],
+                            and, for UNPUBLISHED_UI_APPS, the UI service's host port
+                            (Umbrel reaches the UI through its logged-in app proxy)
   <app>/...                 every other package file, byte-for-byte
 
 plus a root umbrel-app-store.yml and generated-from.json (source commit).
@@ -42,6 +44,12 @@ STORES = {
 }
 
 GPU_APPS = {"kraskus-common-foundry-gpu-miner"}
+
+# Apps whose Umbrel package must not publish the UI port on the host: Umbrel
+# reaches the UI only through its logged-in app proxy, and the app works there
+# without a platform token (app-token fallback). Owner decision 2026-10-08
+# (Kraskus Apps V3 Step 6). app id -> first version the rule applies to.
+UNPUBLISHED_UI_APPS = {"kraskus-kaspa-solo": (0, 4, 0)}
 
 # 5tratumOS-only manifest keys with no Umbrel meaning.
 DROP_KEYS = {"services", "uiMode"}
@@ -156,6 +164,61 @@ def strip_nvidia_reservation(compose_text, app):
     return "\n".join(out)
 
 
+def version_tuple(value):
+    try:
+        return tuple(int(x) for x in str(value).split("."))
+    except ValueError:
+        return ()
+
+
+def unpublish_ui_port(compose_text, app):
+    """Remove the UI service's `ports:` block (the x-5tratumos-secure-proxy ui_service).
+
+    Text-level so every comment and the rest of the file stay byte-identical;
+    the caller verifies the parsed result differs only by that block.
+    """
+    data = yaml.safe_load(compose_text)
+    proxy = data.get("x-5tratumos-secure-proxy") or {}
+    ui, ui_port = proxy.get("ui_service"), proxy.get("ui_port")
+    if not ui or ui not in data.get("services", {}):
+        raise SystemExit(f"{app}: no x-5tratumos-secure-proxy ui_service to unpublish")
+    lines = compose_text.split("\n")
+    out, i, removed, in_ui = [], 0, 0, False
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        indent = len(line) - len(line.lstrip())
+        if indent == 2 and stripped.endswith(":") and not stripped.startswith("#"):
+            in_ui = stripped[:-1] == ui
+        if in_ui and indent == 4 and stripped == "ports:":
+            j = i + 1
+            while j < len(lines) and (not lines[j].strip() or len(lines[j]) - len(lines[j].lstrip()) > 4
+                                      or lines[j].lstrip().startswith("- ")):
+                if lines[j].strip() and len(lines[j]) - len(lines[j].lstrip()) <= 4:
+                    break
+                j += 1
+            while j > i + 1 and not lines[j - 1].strip():
+                j -= 1
+            i = j
+            removed += 1
+            continue
+        out.append(line)
+        i += 1
+    if removed != 1:
+        raise SystemExit(f"{app}: expected exactly one ports block on UI service {ui}, found {removed}")
+    ports = data["services"][ui].get("ports") or []
+    if len(ports) != 1 or not str(ports[0]).split("/")[0].endswith(":%s" % ui_port):
+        raise SystemExit(f"{app}: UI service {ui} publishes more than its UI port: {ports}")
+    return "\n".join(out)
+
+
+def check_ui_unpublish(before, after, app):
+    b, a = yaml.safe_load(before), yaml.safe_load(after)
+    ui = b["x-5tratumos-secure-proxy"]["ui_service"]
+    b["services"][ui].pop("ports")
+    assert a == b, f"{app}: compose changed beyond the UI service's ports"
+
+
 def check_gpu_strip(before, after, app):
     b, a = yaml.safe_load(before), yaml.safe_load(after)
     for name, svc in b["services"].items():
@@ -204,7 +267,17 @@ def main(out_root):
                 check_gpu_strip(before, after, app)
                 with open(cpath, "w", encoding="utf-8", newline="") as f:
                     f.write(after)
-            report[store_repo].append({"id": app, "version": manifest["version"], "gpu": gpu})
+            min_version = UNPUBLISHED_UI_APPS.get(app)
+            ui_unpublished = bool(min_version) and version_tuple(src["version"]) >= min_version
+            if ui_unpublished:
+                cpath = os.path.join(root, app, "docker-compose.yml")
+                before = open(cpath, encoding="utf-8", newline="").read()
+                after = unpublish_ui_port(before, app)
+                check_ui_unpublish(before, after, app)
+                with open(cpath, "w", encoding="utf-8", newline="") as f:
+                    f.write(after)
+            report[store_repo].append({"id": app, "version": manifest["version"], "gpu": gpu,
+                                       "ui_unpublished": ui_unpublished})
 
         with open(os.path.join(root, "generated-from.json"), "w", encoding="utf-8", newline="\n") as f:
             json.dump({"generator": GENERATOR_VERSION, "source_repo": f"kraskuscrypto/{source_name}",
