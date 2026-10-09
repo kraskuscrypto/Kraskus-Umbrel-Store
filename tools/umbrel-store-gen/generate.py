@@ -49,7 +49,7 @@ GPU_APPS = {"kraskus-common-foundry-gpu-miner"}
 # reaches the UI only through its logged-in app proxy, and the app works there
 # without a platform token (app-token fallback). Owner decision 2026-10-08
 # (Kraskus Apps V3 Step 6). app id -> first version the rule applies to.
-UNPUBLISHED_UI_APPS = {"kraskus-kaspa-solo": (0, 4, 0)}
+UNPUBLISHED_UI_APPS = {"kraskus-kaspa-solo": (0, 4, 0), "kraskus-bsv-solo": (0, 5, 0)}
 
 # 5tratumOS-only manifest keys with no Umbrel meaning.
 DROP_KEYS = {"services", "uiMode"}
