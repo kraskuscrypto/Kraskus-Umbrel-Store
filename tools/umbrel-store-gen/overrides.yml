@@ -10,14 +10,15 @@
 # wording (validate.py enforces this).
 
 kraskus-bsv-solo:
-  replaces: [3599b7c2cfd092f9]
+  replaces: [d673bfc20e818520]
   description: >-
     Bitcoin SV runs a self-contained BSV mainnet node (SV Node 1.2.2, pruned, 10 GB
     excessive block size) and a native GMC-to-Stratum V1 solo-mining controller on
     port 1922. The Kraskus interface shows node synchronization, one truthful
     mining-readiness state, workers, shares and blocks confirmed by the node. Miners
-    are refused until the node is synchronized and a valid payout is configured; they
-    must support plain Stratum V1 (version rolling / ASICBoost is not offered). The
+    are refused until the node is synchronized and a valid payout is configured; plain
+    Stratum V1 miners and ASICs that use version rolling (BIP310 / ASICBoost) are
+    supported. The
     built-in wallet receives mining payouts once you have downloaded and verified an
     encrypted backup of the complete wallet file; the same backup restores the exact
     wallet on any install. A wallet password set at the end of wallet set-up protects
