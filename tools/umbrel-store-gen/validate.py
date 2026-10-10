@@ -5,6 +5,9 @@ Rules mirror umbreld source (modules/apps/{schema,app-repository,manifest-compat
 modules/lan-ingress, legacy-compat/app-script) plus Kraskus policy:
   * Umbrel login is the platform auth boundary: no app may set PROXY_AUTH_ADD=false
   * no hard GPU reservations; GPU only through permissions: [GPU]
+  * trusted Umbrel deployment (Kraskus foundation 1.6.0): a service that sets
+    KRASKUS_PLATFORM=umbrel requires that neither the UI service nor any service
+    carrying the variable publishes a host port (ports: or network_mode: host)
 
 usage: validate.py <store-dir> [<store-dir> ...] [--published]
   (store-dir basename must be the GitHub repo name; --published fetches the live icons)
@@ -39,6 +42,7 @@ KNOWN_KEYS = set(REQUIRED) | set(OPTIONAL) | {
     "disabled", "deterministicPassword", "optimizedForUmbrelHome", "torOnly", "requiresHttps", "installSize",
     "widgets", "defaultShell", "implements", "backupIgnore", "storage", "folderAccess", "environment"}
 PERMISSIONS = {"GPU", "STORAGE_DOWNLOADS"}
+PLATFORM_ENV = "KRASKUS_PLATFORM"  # foundation 1.6.0 deployment declaration
 
 PUBLISHED = "--published" in sys.argv  # also fetch icons from GitHub and compare with the repo files
 errors, warnings = [], []
@@ -74,6 +78,32 @@ def host_ports(svc):
         if len(parts) >= 2:
             out.append((int(parts[-2]), proto))
     return out
+
+
+def env_map(svc):
+    env = svc.get("environment") or {}
+    if isinstance(env, list):
+        return dict((str(e).split("=", 1) + [""])[:2] for e in env)
+    return {str(k): ("" if v is None else str(v)) for k, v in env.items()} if isinstance(env, dict) else {}
+
+
+def check_umbrel_deployment(w, c):
+    """Foundation 1.6.0: KRASKUS_PLATFORM=umbrel only with a private UI and private declaring services."""
+    svcs = c.get("services") or {}
+    declaring = {n: env_map(s or {})[PLATFORM_ENV].strip() for n, s in svcs.items() if PLATFORM_ENV in env_map(s or {})}
+    for name, value in sorted(declaring.items()):
+        if value != "umbrel":
+            warn(f"{w}:{name}", f"{PLATFORM_ENV}={value!r} is not 'umbrel'; the app treats it as 5tratumos")
+    if "umbrel" not in declaring.values():
+        return
+    ui = {(c.get("x-5tratumos-secure-proxy") or {}).get("ui_service"),
+          env_map((svcs.get("app_proxy") or {})).get("APP_HOST")} - {None}
+    for name in sorted(ui | set(declaring)):
+        s = svcs.get(name) or {}
+        if s.get("ports") or s.get("network_mode") == "host":
+            err(f"{w}:{name}", f"{PLATFORM_ENV}=umbrel is set but this "
+                f"{'UI ' if name in ui else ''}service publishes host ports "
+                f"({s.get('ports') or 'network_mode: host'}); the UI and every declaring service must be private")
 
 
 def is_image(head):
@@ -205,6 +235,7 @@ def validate_store(root):
         if missing:
             err(w, f"compose uses variables Umbrel does not provide: {sorted(missing)}")
         gpu_perm = "GPU" in (m.get("permissions") or [])
+        check_umbrel_deployment(w, c)
         for sname, s in svcs.items():
             sw = f"{w}:{sname}"
             if "build" in s:
