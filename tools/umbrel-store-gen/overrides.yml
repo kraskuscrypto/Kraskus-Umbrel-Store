@@ -28,18 +28,18 @@ kraskus-bsv-solo:
     (about 650 GB today).
 
 kraskus-chta-solo:
-  replaces: [e6d60d2983b5ef87]
+  replaces: [e6d60d2983b5ef87, 65bec8d9f71b1963]
   description: >-
     CHTA Kraskus runs a self-contained CheetahCoin full node and solo-mining
     appliance. The Kraskus interface shows node synchronization, one truthful
-    mining-readiness state, each Stratum port's live status, workers, accepted and
-    rejected shares, round progress, and blocks independently confirmed by the node.
-    Normal miners connect on port 1926; NMMiner and other very-low-hash devices use
-    port 1927 with a fixed 0.002 difficulty. Both ports stay closed until the node is
-    synchronized and a valid payout is configured. The built-in CheetahCoin wallet
-    can receive, send and act as the mining payout once you have downloaded and
-    verified an encrypted backup of the complete wallet file; the same backup
-    restores the exact wallet on any CHTA Kraskus install. A required 1% developer
+    mining-readiness state, workers, accepted and rejected shares, and blocks
+    independently confirmed by the node. Normal miners connect on port 1926;
+    NMMiner and other very-low-hash devices use port 1927 with a fixed 0.002
+    difficulty. Both ports stay closed until the node is synchronized and a valid
+    payout is configured. The built-in CheetahCoin wallet can receive, send and act
+    as the mining payout once you have downloaded and verified an encrypted backup of
+    the complete wallet file; the same backup restores the exact wallet, and a wallet
+    password protects sending, payout changes and Forget. A required 1% developer
     fee is paid directly from successful block coinbases.
 
 kraskus-common-foundry-gpu-miner:
@@ -66,14 +66,17 @@ kraskus-kaspa-solo:
     hashrate is never diverted.
 
 kraskus-prl-solo:
-  replaces: [af103adef89ddb0a]
+  replaces: [af103adef89ddb0a, 923a26d2788e1758]
   description: >-
-    Pearl by Kraskus runs a real Pearl v1.4.8 mainnet node, native Oyster wallet,
-    Kraskus Pearl Stratum gateway, and the Kraskus interface. Truthful readiness
-    (mining opens only once the node is synced and the wallet's recovery phrase is
-    backed up), wallet create, backup, restore and forget, a verified found-blocks
-    ledger, live worker/share telemetry, and a fixed required 1.00% developer-fee
-    coinbase split on successfully mined blocks.
+    Pearl by Kraskus runs a real Pearl v1.4.8 mainnet node, the native Oyster wallet
+    and the Kraskus Pearl Stratum gateway on port 1902, with truthful readiness:
+    miners get work only once the node is synchronized and a payout is ready. The
+    built-in wallet shows its recovery phrase once and confirms it with a word
+    challenge before mining can pay it; a wallet password protects it, and the
+    wallet can be restored from the phrase or forgotten. A verified found-blocks
+    ledger and live worker and share telemetry are included. Sending from the
+    built-in wallet is not available. A required 1% developer fee is paid directly
+    from each successful block coinbase.
 
 kraskus-quantus-solo:
   replaces: [cdba319319a5d82a]
