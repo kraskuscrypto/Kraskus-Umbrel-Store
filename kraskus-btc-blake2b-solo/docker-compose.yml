@@ -55,7 +55,7 @@ services:
       - no-new-privileges:true
 
   knots:
-    image: ghcr.io/kraskuscrypto/kraskus-5trat-btc-blake2b-knots:0.2.3@sha256:30cd9a906255e79a0a8b9627dfd806c9d3c2088adeb633761d1f2751f310ca4e
+    image: ghcr.io/kraskuscrypto/kraskus-5trat-btc-blake2b-knots:0.2.6@sha256:efe140d215ab6fac0ff0683a254d414f0774071296608c530606f36b1be4fc3e
     pull_policy: missing
     restart: unless-stopped
     # Never SIGKILL Knots before it has flushed its UTXO cache (a kill during
@@ -138,7 +138,7 @@ services:
       - b2b_api
 
   adapter:
-    image: ghcr.io/kraskuscrypto/kraskus-5trat-btc-blake2b-adapter:0.2.5@sha256:9500646307382d24a2bbdce4b20d979b5041f2c763130862363c52deb949f289
+    image: ghcr.io/kraskuscrypto/kraskus-5trat-btc-blake2b-adapter:0.2.6@sha256:65f34c4e4a7118e84b5f9a1092d00880fcdd9a39690212fbdec3dc97407c20c9
     pull_policy: missing
     restart: unless-stopped
     group_add:
@@ -179,7 +179,7 @@ services:
       - b2b_api
 
   ui:
-    image: ghcr.io/kraskuscrypto/kraskus-5trat-btc-blake2b-ui:0.2.3@sha256:7a9dc3d0c31e016e23bcfb58caf91ae684da9d848332cdd66a2d4ec86196eddd
+    image: ghcr.io/kraskuscrypto/kraskus-5trat-btc-blake2b-ui:0.2.6@sha256:6d45a2a417bd05b03044fd834107251f8e5fed41725e9738bb8157c632a6deec
     pull_policy: missing
     restart: unless-stopped
     depends_on:

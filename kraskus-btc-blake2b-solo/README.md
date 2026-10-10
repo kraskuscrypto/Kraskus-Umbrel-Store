@@ -4,10 +4,36 @@
 BTC2b chain, one customer-owned reward wallet, and a CONVOY DATUM true-solo
 Stratum V1 endpoint.
 
+## 0.2.6: Bitcoin Knots 29.4.2 (consensus maintenance)
+
+- **Why:** Bitcoin Knots 29.4.2 activated a *long coinbase maturity* soft fork
+  on the BTC2b chain at block **973,440** (mined 2026-09-21), enforced until
+  block 979,919. 0.2.5 ran Knots 29.4.1 and could follow or build blocks that
+  upgraded nodes reject. 0.2.6 runs Knots 29.4.2.
+- **Block rewards mature later.** Knots 29.4.2's wallet and mempool treat every
+  block reward as spendable only after **6,480 blocks** (about 45 days; shown as
+  6,481 confirmations). The Blocks page takes this rule from the node: rewards
+  that 0.2.5 showed as mature read "Maturing x/6,481" again until they are deep
+  enough. Nothing is lost; they mature on their own.
+- **Network difficulty:** Knots 29.4.2 no longer reports a "difficulty" for
+  BLAKE2b blocks. The app computes the same value from the block header, so the
+  network difficulty, its history and the expected time to block are unchanged.
+- **Updating:** in place. The chain, wallet and settings are kept. An existing
+  0.2.5 install that already synced into the activation window is revalidated
+  locally on its first start with 0.2.6: Knots rewinds to block 973,439 and
+  re-checks the window's blocks from disk under the new rule (a few minutes).
+  This does not need a full blockchain re-sync as long as those blocks are
+  still on disk, which the default 100 GiB prune keeps; a node pruned much
+  further may be asked to re-sync.
+- **Maturity while the rule applies:** rewards need **6,481 confirmations**
+  while Knots reports the long-coinbase-maturity deployment (active now,
+  enforced through block 979,919).
+- DATUM, Stratum, payout, wallet and the developer fee are unchanged.
+
 ## Chain
 
 BTC2b is Bitcoin mainnet history hard-forked to BLAKE2b proof of work at
-block 961640 by upstream Bitcoin Knots consensus (v29.4.1.knots20260508).
+block 961640 by upstream Bitcoin Knots consensus (v29.4.2.knots20260508).
 The node verifies the fork checkpoint; addresses are Bitcoin-style `bc1...`.
 
 ## Ports
