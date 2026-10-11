@@ -82,7 +82,9 @@ kraskus-quantus-solo:
   # Written against the 0.3.0 dev-fee listing (owner decisions 2026-10-10). The
   # earlier fingerprint (cdba319319a5d82a, "No developer fee") is dropped on
   # purpose: this copy must never be applied to a source without the fee.
-  replaces: [6f5e0f8badaee55e]
+  # 0.3.1 (2026-10-11): the source copy now says the first reward identity is set in the app; this
+  # platform-neutral copy names no login rule, so it stays accurate (reviewed).
+  replaces: [6f5e0f8badaee55e, 0d5e3cfda90c0da1]
   description: >-
     Quantus Solo runs a Quantus mainnet full node on your own hardware and lets your
     Quantus miners on the local network mine to your own wormhole reward address.
