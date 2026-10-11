@@ -79,14 +79,23 @@ kraskus-prl-solo:
     from each successful block coinbase.
 
 kraskus-quantus-solo:
-  replaces: [cdba319319a5d82a]
+  # Written against the 0.3.0 dev-fee listing (owner decisions 2026-10-10). The
+  # earlier fingerprint (cdba319319a5d82a, "No developer fee") is dropped on
+  # purpose: this copy must never be applied to a source without the fee.
+  replaces: [6f5e0f8badaee55e]
   description: >-
     Quantus Solo runs a Quantus mainnet full node on your own hardware and lets your
     Quantus miners on the local network mine to your own wormhole reward address.
     You import the reward address and its inner hash; the app checks that they
     belong together and never asks for your 24 words. An optional local CPU miner is
-    included for testing only; it is not profitable on mainnet. No developer fee.
-    Upstream telemetry is turned off.
+    included for testing only; it is not profitable on mainnet. Upstream telemetry is
+    turned off. Kraskus Quantus Solo includes a 1% developer fee. One out of every 100
+    block heights is assigned to the Kraskus developer reward identity; all other
+    heights use your configured reward identity. Because solo mining rewards depend
+    on when blocks are actually found, your realized fee percentage over a short
+    period may differ from 1%. Kraskus Quantus Solo uses the official Quantus node
+    source as its base. Kraskus applies a disclosed developer-fee modification to
+    block-template reward selection. The miner remains unmodified.
 
 kraskus-xmr-solo:
   replaces: [472d2a27ba78ebc4]
