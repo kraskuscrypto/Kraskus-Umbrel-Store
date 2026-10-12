@@ -37,9 +37,9 @@
     },
     {
       "id": "kraskus-prl-solo",
-      "version": "0.2.0",
+      "version": "0.5.1",
       "gpu": false,
-      "ui_unpublished": false
+      "ui_unpublished": true
     },
     {
       "id": "kraskus-xmr-solo",
