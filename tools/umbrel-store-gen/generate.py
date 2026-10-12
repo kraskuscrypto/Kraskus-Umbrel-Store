@@ -119,29 +119,48 @@ def source_fingerprint(src):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
 
 
+def _variants(override):
+    """An app's override is one mapping, or a list of mappings (variants): one per
+    source copy, so Main and Dev can carry different reviewed copy when they ship
+    different versions (e.g. CHTA 0.3.1 on Main, 0.5.x on Dev)."""
+    if not override:
+        return []
+    return override if isinstance(override, list) else [override]
+
+
 def load_overrides():
     if not os.path.exists(OVERRIDES_FILE):
         return {}
     data = yaml.safe_load(open(OVERRIDES_FILE, encoding="utf-8")) or {}
-    for app, fields in data.items():
-        fields = fields or {}
-        bad = set(fields) - OVERRIDABLE - {"replaces"}
-        if bad:
-            raise SystemExit(f"overrides.yml: {app}: only {sorted(OVERRIDABLE)} may be overridden, not {sorted(bad)}")
-        if not fields.get("replaces"):
-            raise SystemExit(f"overrides.yml: {app}: missing `replaces` (source copy fingerprints)")
+    for app, override in data.items():
+        seen = set()
+        for fields in _variants(override):
+            fields = fields or {}
+            bad = set(fields) - OVERRIDABLE - {"replaces"}
+            if bad:
+                raise SystemExit(f"overrides.yml: {app}: only {sorted(OVERRIDABLE)} may be overridden, not {sorted(bad)}")
+            if not fields.get("replaces"):
+                raise SystemExit(f"overrides.yml: {app}: missing `replaces` (source copy fingerprints)")
+            dup = seen & set(fields["replaces"])
+            if dup:
+                raise SystemExit(f"overrides.yml: {app}: fingerprint(s) {sorted(dup)} listed in more than one variant")
+            seen |= set(fields["replaces"])
     return data
 
 
 def apply_override(src, app, override):
-    """Return the override fields, refusing if the source copy changed since the override was written."""
-    if not override:
+    """Return the override fields of the variant written for this source copy,
+    refusing if the source copy changed since any variant was written."""
+    variants = _variants(override)
+    if not variants:
         return {}
     fp = source_fingerprint(src)
-    if fp not in override["replaces"]:
-        raise SystemExit(f"overrides.yml: {app}: source listing copy changed (fingerprint {fp} not in "
-                         f"{override['replaces']}); review the Umbrel copy, then add {fp} to `replaces`")
-    return {k: v for k, v in override.items() if k != "replaces"}
+    for fields in variants:
+        if fp in fields["replaces"]:
+            return {k: v for k, v in fields.items() if k != "replaces"}
+    known = [f for v in variants for f in v["replaces"]]
+    raise SystemExit(f"overrides.yml: {app}: source listing copy changed (fingerprint {fp} not in "
+                     f"{known}); review the Umbrel copy, then add {fp} to `replaces`")
 
 
 def build_manifest(src, app, icon_url, gpu, overrides=None):
