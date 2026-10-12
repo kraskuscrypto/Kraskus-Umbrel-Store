@@ -28,19 +28,35 @@ kraskus-bsv-solo:
     (about 650 GB today).
 
 kraskus-chta-solo:
-  replaces: [e6d60d2983b5ef87, 65bec8d9f71b1963]
-  description: >-
-    CHTA Kraskus runs a self-contained CheetahCoin full node and solo-mining
-    appliance. The Kraskus interface shows node synchronization, one truthful
-    mining-readiness state, workers, accepted and rejected shares, and blocks
-    independently confirmed by the node. Normal miners connect on port 1926;
-    NMMiner and other very-low-hash devices use port 1927 with a fixed 0.002
-    difficulty. Both ports stay closed until the node is synchronized and a valid
-    payout is configured. The built-in CheetahCoin wallet can receive, send and act
-    as the mining payout once you have downloaded and verified an encrypted backup of
-    the complete wallet file; the same backup restores the exact wallet, and a wallet
-    password protects sending, payout changes and Forget. A required 1% developer
-    fee is paid directly from successful block coinbases.
+  # Main 0.3.1 source copy: the reviewed Umbrel copy published on Umbrel Main
+  # (restored verbatim from before 2f4c63c merged both fingerprints into one text).
+  - replaces: [e6d60d2983b5ef87]
+    description: >-
+      CHTA Kraskus runs a self-contained CheetahCoin full node and solo-mining
+      appliance. The Kraskus interface shows node synchronization, one truthful
+      mining-readiness state, each Stratum port's live status, workers, accepted and
+      rejected shares, round progress, and blocks independently confirmed by the node.
+      Normal miners connect on port 1926; NMMiner and other very-low-hash devices use
+      port 1927 with a fixed 0.002 difficulty. Both ports stay closed until the node is
+      synchronized and a valid payout is configured. The built-in CheetahCoin wallet
+      can receive, send and act as the mining payout once you have downloaded and
+      verified an encrypted backup of the complete wallet file; the same backup
+      restores the exact wallet on any CHTA Kraskus install. A required 1% developer
+      fee is paid directly from successful block coinbases.
+  # Dev 0.5.0 (Kraskus Apps V3) source copy.
+  - replaces: [65bec8d9f71b1963]
+    description: >-
+      CHTA Kraskus runs a self-contained CheetahCoin full node and solo-mining
+      appliance. The Kraskus interface shows node synchronization, one truthful
+      mining-readiness state, workers, accepted and rejected shares, and blocks
+      independently confirmed by the node. Normal miners connect on port 1926;
+      NMMiner and other very-low-hash devices use port 1927 with a fixed 0.002
+      difficulty. Both ports stay closed until the node is synchronized and a valid
+      payout is configured. The built-in CheetahCoin wallet can receive, send and act
+      as the mining payout once you have downloaded and verified an encrypted backup of
+      the complete wallet file; the same backup restores the exact wallet, and a wallet
+      password protects sending, payout changes and Forget. A required 1% developer
+      fee is paid directly from successful block coinbases.
 
 kraskus-common-foundry-gpu-miner:
   replaces: [f07c9c4c58adeb27]
