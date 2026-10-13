@@ -164,6 +164,39 @@ class Generate(unittest.TestCase):
         self.assertIn("    - 3335:3335\n", text)
         self.assertIn("    # app-token fallback directory\n    volumes:\n    - ./t:/t:ro\n", text)
 
+    def test_dgb_from_0_2_0_loses_only_the_ui_port(self):
+        # DGB 0.2.0 is Kraskus V3 (owner decisions 2026-10-13): Umbrel reaches the
+        # UI through its app proxy; P2P 12024 and Stratum 1928-1930 stay published.
+        # No deployment declaration (no PLATFORM_AUTHENTICATED routes, as BSV).
+        dgb = ("x-5tratumos-secure-proxy: {version: 1, ui_service: ui, ui_port: 8080, token_services: [adapter]}\n"
+               "services:\n"
+               "  node:\n"
+               "    image: n\n"
+               "    ports:\n"
+               "      - \"12024:12024/tcp\"\n"
+               "  stratum-sha256d:\n"
+               "    image: s\n"
+               "    ports:\n"
+               "      - \"1928:1928/tcp\"\n"
+               "  ui:\n"
+               "    image: u\n"
+               "    environment:\n"
+               "      ADAPTER_HOST: adapter\n"
+               "    # published once on the manifest port\n"
+               "    ports:\n"
+               "      - \"33071:8080/tcp\"\n"
+               "    volumes:\n"
+               "      - ${APP_DATA_DIR}/runtime/app-token:/run/kraskus-app-token:ro\n")
+        text, ui_unpublished, service = generate.umbrel_compose("kraskus-dgb-solo", "0.2.0", dgb)
+        self.assertTrue(ui_unpublished)
+        self.assertIsNone(service)
+        self.assertNotIn("33071", text)
+        self.assertIn("12024:12024/tcp", text)
+        self.assertIn("1928:1928/tcp", text)
+        self.assertIn("/run/kraskus-app-token:ro", text)
+        self.assertNotIn("KRASKUS_PLATFORM", text)
+        self.assertEqual(generate.umbrel_compose("kraskus-dgb-solo", "0.1.3", dgb), (dgb, False, None))
+
     def test_apps_outside_the_ui_rule_are_untouched(self):
         self.assertEqual(generate.umbrel_compose("kraskus-xmr-solo", "9.9.9", SOURCE), (SOURCE, False, None))
 
