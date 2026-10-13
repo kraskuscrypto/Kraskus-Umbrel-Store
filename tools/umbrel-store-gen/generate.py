@@ -56,8 +56,11 @@ GPU_APPS = {"kraskus-common-foundry-gpu-miner"}
 # Quantus Solo 0.3.0 (its first V3 version, owner decision D11 2026-10-10): only
 # the UI port goes; the node's miner ingress 1935/udp and P2P 30333/tcp stay
 # published (check_ui_unpublish refuses any other change). Inert for 0.1.x.
+# Zcash by Kraskus 0.5.0 (its first V3 version, owner YES 2026-10-13): the UI
+# port 33062 goes; the Stratum 3335/tcp stays published. First promoted: 0.5.1.
 UNPUBLISHED_UI_APPS = {"kraskus-kaspa-solo": (0, 4, 0), "kraskus-bsv-solo": (0, 5, 0), "kraskus-prl-solo": (0, 5, 0),
-                       "kraskus-chta-solo": (0, 5, 0), "kraskus-quantus-solo": (0, 3, 0)}
+                       "kraskus-chta-solo": (0, 5, 0), "kraskus-quantus-solo": (0, 3, 0),
+                       "kraskus-zec-solo": (0, 5, 0)}
 
 # Trusted Umbrel deployment mode (Kraskus foundation 1.6.0, owner YES 2026-10-10).
 # app id -> the token-validating backend service whose environment gets
@@ -259,7 +262,9 @@ def unpublish_ui_port(compose_text, app):
             j = i + 1
             while j < len(lines) and (not lines[j].strip() or len(lines[j]) - len(lines[j].lstrip()) > 4
                                       or lines[j].lstrip().startswith("- ")):
-                if lines[j].strip() and len(lines[j]) - len(lines[j].lstrip()) <= 4:
+                # A compact list (`- item` at the key's own indent, ZEC) is part of the block.
+                if (lines[j].strip() and len(lines[j]) - len(lines[j].lstrip()) <= 4
+                        and not (len(lines[j]) - len(lines[j].lstrip()) == 4 and lines[j].lstrip().startswith("- "))):
                     break
                 j += 1
             while j > i + 1 and not lines[j - 1].strip():
