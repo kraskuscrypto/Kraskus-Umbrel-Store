@@ -121,6 +121,49 @@ class Generate(unittest.TestCase):
                 self.assertIsNone(service)
                 self.assertNotIn("KRASKUS_PLATFORM", text)
 
+    def test_zec_from_0_5_0_loses_only_the_ui_port(self):
+        # Owner YES 2026-10-13: ZEC follows the V3 rule from 0.5.0 (first promoted: 0.5.1).
+        zec = ("x-5tratumos-secure-proxy: {version: 1, ui_service: ui, ui_port: 8080, token_services: [kraskus]}\n"
+               "services:\n"
+               "  kraskus:\n"
+               "    image: k\n"
+               "    ports:\n"
+               "      - 3335:3335\n"
+               "  ui:\n"
+               "    image: u\n"
+               "    ports:\n"
+               "      - 33062:8080/tcp\n")
+        for version in ("0.5.0", "0.5.1"):
+            with self.subTest(version=version):
+                text, ui_unpublished, service = generate.umbrel_compose("kraskus-zec-solo", version, zec)
+                self.assertTrue(ui_unpublished)
+                self.assertIsNone(service)
+                self.assertNotIn("33062", text)
+                self.assertIn("3335:3335", text)
+                self.assertNotIn("KRASKUS_PLATFORM", text)
+        self.assertEqual(generate.umbrel_compose("kraskus-zec-solo", "0.4.0", zec), (zec, False, None))
+        # The real ZEC compose writes compact lists (`- item` at the key's indent)
+        # with comments around the UI ports block; only the block itself goes.
+        compact = ("x-5tratumos-secure-proxy: {version: 1, ui_service: ui, ui_port: 8080, token_services: [kraskus]}\n"
+                   "services:\n"
+                   "  kraskus:\n"
+                   "    image: k\n"
+                   "    ports:\n"
+                   "    - 3335:3335\n"
+                   "  ui:\n"
+                   "    image: u\n"
+                   "    # published once on the manifest port\n"
+                   "    ports:\n"
+                   "    - 33062:8080/tcp\n"
+                   "    # app-token fallback directory\n"
+                   "    volumes:\n"
+                   "    - ./t:/t:ro\n")
+        text, ui_unpublished, _ = generate.umbrel_compose("kraskus-zec-solo", "0.5.1", compact)
+        self.assertTrue(ui_unpublished)
+        self.assertNotIn("33062", text)
+        self.assertIn("    - 3335:3335\n", text)
+        self.assertIn("    # app-token fallback directory\n    volumes:\n    - ./t:/t:ro\n", text)
+
     def test_apps_outside_the_ui_rule_are_untouched(self):
         self.assertEqual(generate.umbrel_compose("kraskus-xmr-solo", "9.9.9", SOURCE), (SOURCE, False, None))
 
