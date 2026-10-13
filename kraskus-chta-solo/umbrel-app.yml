@@ -3,7 +3,7 @@ manifestVersion: 1
 id: kraskus-chta-solo
 name: CheetahCoin by Kraskus
 tagline: CheetahCoin full node and SHA256 solo mining
-icon: https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Umbrel-Store/main/kraskus-chta-solo/assets/chta-official-emblem-v2.png
+icon: https://raw.githubusercontent.com/kraskuscrypto/Kraskus-Umbrel-Store/main/kraskus-chta-solo/assets/cheetahcoin.png
 category: Mining
 version: 0.3.1
 port: 33064

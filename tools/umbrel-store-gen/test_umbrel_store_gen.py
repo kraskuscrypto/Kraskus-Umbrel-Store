@@ -260,5 +260,39 @@ class Validate(unittest.TestCase):
         self.assertEqual(len([e for e in validate.errors if "KRASKUS_PLATFORM" in e]), 1)
 
 
+class HoldsTest(unittest.TestCase):
+    """holds.yml pins an app's package to a full source commit (icon still from SOURCE_REF)."""
+
+    def write(self, text):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d)
+        p = os.path.join(d, "holds.yml")
+        with open(p, "w", encoding="utf-8") as f:
+            f.write(text)
+        return p
+
+    def test_missing_file_means_no_holds(self):
+        self.assertEqual(generate.load_holds(os.path.join(tempfile.gettempdir(), "no-such-holds.yml")), {})
+
+    def test_full_commit_is_accepted(self):
+        sha = "0e33c0875f0939b81e07bd41380224bfe7c0bc7e"
+        holds = generate.load_holds(self.write(f"Kraskus-Umbrel-Store:\n  kraskus-chta-solo: {sha}\n"))
+        self.assertEqual(holds, {"Kraskus-Umbrel-Store": {"kraskus-chta-solo": sha}})
+
+    def test_short_commit_is_refused(self):
+        with self.assertRaises(SystemExit):
+            generate.load_holds(self.write("Kraskus-Umbrel-Store:\n  kraskus-chta-solo: 0e33c08\n"))
+
+    def test_unknown_store_is_refused(self):
+        with self.assertRaises(SystemExit):
+            generate.load_holds(self.write(
+                "Some-Other-Store:\n  kraskus-chta-solo: 0e33c0875f0939b81e07bd41380224bfe7c0bc7e\n"))
+
+    def test_repo_holds_file_loads(self):
+        holds = generate.load_holds()
+        self.assertEqual(set(holds), {"Kraskus-Umbrel-Store", "Kraskus-Umbrel-Dev-Store"})
+        self.assertEqual({a for h in holds.values() for a in h}, {"kraskus-chta-solo"})
+
+
 if __name__ == "__main__":
     unittest.main()
