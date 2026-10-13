@@ -367,7 +367,8 @@ class HoldsTest(unittest.TestCase):
     def test_repo_holds_file_loads(self):
         holds = generate.load_holds()
         self.assertEqual(set(holds), {"Kraskus-Umbrel-Store", "Kraskus-Umbrel-Dev-Store"})
-        self.assertEqual({a for h in holds.values() for a in h}, {"kraskus-chta-solo"})
+        # CHTA holds lifted 2026-10-13 (CHTA 0.5.2 Umbrel qualification): no app is held.
+        self.assertEqual({a for h in holds.values() for a in h}, set())
 
 
 if __name__ == "__main__":
