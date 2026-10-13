@@ -60,7 +60,7 @@ GPU_APPS = {"kraskus-common-foundry-gpu-miner"}
 # port 33062 goes; the Stratum 3335/tcp stays published. First promoted: 0.5.2.
 UNPUBLISHED_UI_APPS = {"kraskus-kaspa-solo": (0, 4, 0), "kraskus-bsv-solo": (0, 5, 0), "kraskus-prl-solo": (0, 5, 0),
                        "kraskus-chta-solo": (0, 5, 0), "kraskus-quantus-solo": (0, 3, 0),
-                       "kraskus-zec-solo": (0, 5, 0)}
+                       "kraskus-zec-solo": (0, 5, 0), "kraskus-dgb-solo": (0, 2, 0)}
 
 # Trusted Umbrel deployment mode (Kraskus foundation 1.6.0, owner YES 2026-10-10).
 # app id -> the token-validating backend service whose environment gets
