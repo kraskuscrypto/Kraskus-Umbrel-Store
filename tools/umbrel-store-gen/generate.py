@@ -57,7 +57,7 @@ GPU_APPS = {"kraskus-common-foundry-gpu-miner"}
 # the UI port goes; the node's miner ingress 1935/udp and P2P 30333/tcp stay
 # published (check_ui_unpublish refuses any other change). Inert for 0.1.x.
 # Zcash by Kraskus 0.5.0 (its first V3 version, owner YES 2026-10-13): the UI
-# port 33062 goes; the Stratum 3335/tcp stays published. First promoted: 0.5.1.
+# port 33062 goes; the Stratum 3335/tcp stays published. First promoted: 0.5.2.
 UNPUBLISHED_UI_APPS = {"kraskus-kaspa-solo": (0, 4, 0), "kraskus-bsv-solo": (0, 5, 0), "kraskus-prl-solo": (0, 5, 0),
                        "kraskus-chta-solo": (0, 5, 0), "kraskus-quantus-solo": (0, 3, 0),
                        "kraskus-zec-solo": (0, 5, 0)}

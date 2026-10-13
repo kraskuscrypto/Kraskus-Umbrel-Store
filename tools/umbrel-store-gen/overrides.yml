@@ -127,7 +127,7 @@ kraskus-xmr-solo:
     miner hashrate is never diverted.
 
 kraskus-zec-solo:
-  # 0.4.0 source copy (Umbrel Main until ZEC 0.5.1 is promoted there).
+  # 0.4.0 source copy (published on Umbrel before 0.5.2).
   - replaces: [96e77c205182a699]
     description: >-
       Kraskus ZEC Solo runs an easy-to-use Zcash full node and local solo mining
@@ -135,7 +135,7 @@ kraskus-zec-solo:
       readiness, worker connections, mining jobs, and block submissions from a single
       interface. Normal users do not need to manage Zebra, RPC, Docker, Linux, JSON, or
       Stratum configuration.
-  # 0.5.1 (Kraskus Apps V3, pre-NU7) source copy.
+  # 0.5.x (Kraskus Apps V3, pre-NU7) source copy (0.5.1 and 0.5.2 share it).
   - replaces: [1a3474dd9161a35f]
     description: >-
       Zcash by Kraskus runs a self-contained Zcash Mainnet full node (Zebra), the
