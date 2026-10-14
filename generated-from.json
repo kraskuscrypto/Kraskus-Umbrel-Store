@@ -2,7 +2,7 @@
   "generator": "1.0.0",
   "source_repo": "kraskuscrypto/Kraskus-Crypto-Store",
   "source_ref": "origin/main",
-  "source_commit": "15cf7d896a80473200a85b726fc1ba8372810f94",
+  "source_commit": "a472b76deb1a01f73462f8badfa68b142166d93e",
   "store_id": "kraskus",
   "apps": [
     {
@@ -43,7 +43,7 @@
     },
     {
       "id": "kraskus-xmr-solo",
-      "version": "0.1.20",
+      "version": "0.1.22",
       "gpu": false,
       "ui_unpublished": false
     },
