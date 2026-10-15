@@ -116,15 +116,28 @@ kraskus-quantus-solo:
     block-template reward selection. The miner remains unmodified.
 
 kraskus-xmr-solo:
-  replaces: [472d2a27ba78ebc4]
-  description: >-
-    Monero by Kraskus runs a self-contained Monero node, wallet, and true solo mining
-    appliance. XMRig connects to a RandomX Stratum endpoint on port 1921, with real
-    worker, share, hashrate, and submitted-difficulty telemetry while only
-    network-valid blocks are forwarded to the local monerod. Wallet state and
-    blockchain data remain in the app's persistent storage. An automatic 1% developer
-    fee applies only to successfully mined block rewards after 60-block maturity;
-    miner hashrate is never diverted.
+  # 0.1.x source copy.
+  - replaces: [472d2a27ba78ebc4]
+    description: >-
+      Monero by Kraskus runs a self-contained Monero node, wallet, and true solo mining
+      appliance. XMRig connects to a RandomX Stratum endpoint on port 1921, with real
+      worker, share, hashrate, and submitted-difficulty telemetry while only
+      network-valid blocks are forwarded to the local monerod. Wallet state and
+      blockchain data remain in the app's persistent storage. An automatic 1% developer
+      fee applies only to successfully mined block rewards after 60-block maturity;
+      miner hashrate is never diverted.
+  # 0.2.0 (Kraskus Apps V3) source copy.
+  - replaces: [681bad73f26e0b18]
+    description: >-
+      Monero by Kraskus runs a self-contained Monero node, wallet, and true solo mining
+      appliance. The wallet has a 25-word recovery phrase (or watch-only with the secret
+      view key) and a wallet password that protects backup, send and forget. XMRig
+      connects to a RandomX Stratum endpoint on port 1921, with real worker, share,
+      hashrate, and submitted-difficulty telemetry while only network-valid blocks are
+      forwarded to the local monerod. Wallet state and blockchain data remain in the
+      app's persistent storage. An automatic 1% developer fee applies only to
+      successfully mined block rewards after 60-block maturity; miner hashrate is never
+      diverted.
 
 kraskus-zec-solo:
   # 0.4.0 source copy (published on Umbrel before 0.5.2).
