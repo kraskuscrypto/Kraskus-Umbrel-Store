@@ -198,7 +198,40 @@ class Generate(unittest.TestCase):
         self.assertEqual(generate.umbrel_compose("kraskus-dgb-solo", "0.1.3", dgb), (dgb, False, None))
 
     def test_apps_outside_the_ui_rule_are_untouched(self):
-        self.assertEqual(generate.umbrel_compose("kraskus-xmr-solo", "9.9.9", SOURCE), (SOURCE, False, None))
+        self.assertEqual(generate.umbrel_compose("kraskus-xmr-solo", "0.1.22", SOURCE), (SOURCE, False, None))
+        self.assertEqual(generate.umbrel_compose("kraskus-example-solo", "9.9.9", SOURCE), (SOURCE, False, None))
+
+    def test_xmr_from_0_2_0_loses_only_the_ui_port(self):
+        # XMR 0.2.0 is Kraskus V3 (owner decisions 2026-10-13/14): Umbrel reaches the
+        # UI through its app proxy; P2P 18080 and Stratum 1921 stay published.
+        # No deployment declaration (no PLATFORM_AUTHENTICATED routes).
+        xmr = ("x-5tratumos-secure-proxy: {version: 1, ui_service: ui, ui_port: 8080, token_services: [adapter]}\n"
+               "services:\n"
+               "  monerod:\n"
+               "    image: m\n"
+               "    ports:\n"
+               "      - \"18080:18080/tcp\"\n"
+               "  gateway:\n"
+               "    image: g\n"
+               "    ports:\n"
+               "      - \"1921:1921/tcp\"\n"
+               "  ui:\n"
+               "    image: u\n"
+               "    environment:\n"
+               "      ADAPTER_HOST: adapter\n"
+               "    ports:\n"
+               "      - \"33065:8080/tcp\"\n"
+               "    volumes:\n"
+               "      - ${APP_DATA_DIR}/runtime/app-token:/run/kraskus-app-token:ro\n")
+        text, changed, declared = generate.umbrel_compose("kraskus-xmr-solo", "0.2.0", xmr)
+        self.assertTrue(changed)
+        self.assertIsNone(declared)
+        self.assertNotIn("33065", text)
+        self.assertIn("18080:18080/tcp", text)
+        self.assertIn("1921:1921/tcp", text)
+        self.assertIn("/run/kraskus-app-token:ro", text)
+        self.assertNotIn("KRASKUS_PLATFORM", text)
+        self.assertEqual(generate.umbrel_compose("kraskus-xmr-solo", "0.1.22", xmr), (xmr, False, None))
 
     def test_default_is_no_declaration(self):
         self.assertEqual(generate.UMBREL_DEPLOYMENT_SERVICES, {QUANTUS: "adapter"})
