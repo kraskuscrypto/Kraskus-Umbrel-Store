@@ -2,7 +2,7 @@
   "generator": "1.0.0",
   "source_repo": "kraskuscrypto/Kraskus-Crypto-Store",
   "source_ref": "origin/main",
-  "source_commit": "a472b76deb1a01f73462f8badfa68b142166d93e",
+  "source_commit": "885639fae9832c69922d990542b6ac267fc290a2",
   "store_id": "kraskus",
   "apps": [
     {
@@ -43,9 +43,9 @@
     },
     {
       "id": "kraskus-xmr-solo",
-      "version": "0.1.22",
+      "version": "0.2.0",
       "gpu": false,
-      "ui_unpublished": false
+      "ui_unpublished": true
     },
     {
       "id": "kraskus-zec-solo",
