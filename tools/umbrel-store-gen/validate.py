@@ -138,6 +138,14 @@ def check_icon(where, url, root, store_repo):
         err(where, f"icon {url} unreachable: {e}")
 
 
+def unknown_umbrel_variables(text):
+    # Compose turns $$ into a literal container-shell dollar, not an Umbrel variable.
+    text = re.sub(r"(?m)^\s*#.*$", "", text).replace("$$", "")
+    used = set(re.findall(r"\$\{?([A-Z_][A-Z0-9_]*)", text))
+    defaulted = set(re.findall(r"\$\{([A-Z_][A-Z0-9_]*):?-[^}]*\}", text))
+    return used - UMBREL_VARS - defaulted
+
+
 def validate_store(root):
     name = os.path.basename(root.rstrip("/\\"))
     meta_path = os.path.join(root, "umbrel-app-store.yml")
@@ -230,8 +238,7 @@ def validate_store(root):
             for k in ("PROXY_AUTH_WHITELIST", "PROXY_AUTH_BLACKLIST"):
                 if env.get(k):
                     warn(w, f"{k}={env[k]!r} - review against the platform-login policy")
-        used = set(re.findall(r"\$\{?([A-Z_][A-Z0-9_]*)", re.sub(r"(?m)^\s*#.*$", "", text)))
-        missing = used - UMBREL_VARS
+        missing = unknown_umbrel_variables(text)
         if missing:
             err(w, f"compose uses variables Umbrel does not provide: {sorted(missing)}")
         gpu_perm = "GPU" in (m.get("permissions") or [])

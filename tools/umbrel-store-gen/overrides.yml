@@ -1,183 +1,214 @@
-# Umbrel store-listing copy, applied by generate.py to every Umbrel store.
-#
-# Allowed fields: name, tagline, description, releaseNotes. IDs, versions, ports
-# and everything else always come from the 5tratumOS source manifest.
-#
-# `replaces` lists the fingerprints of the source copy (name, tagline,
-# description) this text was written against. When the source copy changes,
-# generation stops until the Umbrel copy here has been reviewed and the new
-# fingerprint added. Copy must stay platform-neutral: no 5tratumOS/Workbench
-# wording (validate.py enforces this).
-
 kraskus-bsv-solo:
-  replaces: [d673bfc20e818520]
-  description: >-
-    Bitcoin SV runs a self-contained BSV mainnet node (SV Node 1.2.2, pruned, 10 GB
-    excessive block size) and a native GMC-to-Stratum V1 solo-mining controller on
-    port 1922. The Kraskus interface shows node synchronization, one truthful
-    mining-readiness state, workers, shares and blocks confirmed by the node. Miners
-    are refused until the node is synchronized and a valid payout is configured; plain
-    Stratum V1 miners and ASICs that use version rolling (BIP310 / ASICBoost) are
-    supported. The
-    built-in wallet receives mining payouts once you have downloaded and verified an
-    encrypted backup of the complete wallet file; the same backup restores the exact
-    wallet on any install. A wallet password set at the end of wallet set-up protects
-    backups, Forget and payout changes. Sending from the built-in wallet is not
-    available. A required 1% developer fee is paid directly from each successful
-    block coinbase. Even pruned, the Bitcoin SV node needs several hundred GB of disk
-    (about 650 GB today).
-
+  replaces:
+  - d673bfc20e818520
+  description: Bitcoin SV runs a self-contained BSV mainnet node (SV Node 1.2.2, pruned, 10 GB excessive block size)
+    and a native GMC-to-Stratum V1 solo-mining controller on port 1922. The Kraskus interface shows node synchronization,
+    one truthful mining-readiness state, workers, shares and blocks confirmed by the node. Miners are refused until
+    the node is synchronized and a valid payout is configured; plain Stratum V1 miners and ASICs that use version
+    rolling (BIP310 / ASICBoost) are supported. The built-in wallet receives mining payouts once you have downloaded
+    and verified an encrypted backup of the complete wallet file; the same backup restores the exact wallet on any
+    install. A wallet password set at the end of wallet set-up protects backups, Forget and payout changes. Sending
+    from the built-in wallet is not available. A required 1% developer fee is paid directly from each successful
+    block coinbase. Even pruned, the Bitcoin SV node needs several hundred GB of disk (about 650 GB today).
 kraskus-chta-solo:
-  # Main 0.3.1 source copy: the reviewed Umbrel copy published on Umbrel Main
-  # (restored verbatim from before 2f4c63c merged both fingerprints into one text).
-  - replaces: [e6d60d2983b5ef87]
-    description: >-
-      CHTA Kraskus runs a self-contained CheetahCoin full node and solo-mining
-      appliance. The Kraskus interface shows node synchronization, one truthful
-      mining-readiness state, each Stratum port's live status, workers, accepted and
-      rejected shares, round progress, and blocks independently confirmed by the node.
-      Normal miners connect on port 1926; NMMiner and other very-low-hash devices use
-      port 1927 with a fixed 0.002 difficulty. Both ports stay closed until the node is
-      synchronized and a valid payout is configured. The built-in CheetahCoin wallet
-      can receive, send and act as the mining payout once you have downloaded and
-      verified an encrypted backup of the complete wallet file; the same backup
-      restores the exact wallet on any CHTA Kraskus install. A required 1% developer
-      fee is paid directly from successful block coinbases.
-  # Dev 0.5.0 (Kraskus Apps V3) source copy.
-  - replaces: [65bec8d9f71b1963]
-    description: >-
-      CHTA Kraskus runs a self-contained CheetahCoin full node and solo-mining
-      appliance. The Kraskus interface shows node synchronization, one truthful
-      mining-readiness state, workers, accepted and rejected shares, and blocks
-      independently confirmed by the node. Normal miners connect on port 1926;
-      NMMiner and other very-low-hash devices use port 1927 with a fixed 0.002
-      difficulty. Both ports stay closed until the node is synchronized and a valid
-      payout is configured. The built-in CheetahCoin wallet can receive, send and act
-      as the mining payout once you have downloaded and verified an encrypted backup of
-      the complete wallet file; the same backup restores the exact wallet, and a wallet
-      password protects sending, payout changes and Forget. A required 1% developer
-      fee is paid directly from successful block coinbases.
-
+- replaces:
+  - e6d60d2983b5ef87
+  description: CHTA Kraskus runs a self-contained CheetahCoin full node and solo-mining appliance. The Kraskus interface
+    shows node synchronization, one truthful mining-readiness state, each Stratum port's live status, workers, accepted
+    and rejected shares, round progress, and blocks independently confirmed by the node. Normal miners connect on
+    port 1926; NMMiner and other very-low-hash devices use port 1927 with a fixed 0.002 difficulty. Both ports stay
+    closed until the node is synchronized and a valid payout is configured. The built-in CheetahCoin wallet can
+    receive, send and act as the mining payout once you have downloaded and verified an encrypted backup of the
+    complete wallet file; the same backup restores the exact wallet on any CHTA Kraskus install. A required 1% developer
+    fee is paid directly from successful block coinbases.
+- replaces:
+  - 65bec8d9f71b1963
+  description: CHTA Kraskus runs a self-contained CheetahCoin full node and solo-mining appliance. The Kraskus interface
+    shows node synchronization, one truthful mining-readiness state, workers, accepted and rejected shares, and
+    blocks independently confirmed by the node. Normal miners connect on port 1926; NMMiner and other very-low-hash
+    devices use port 1927 with a fixed 0.002 difficulty. Both ports stay closed until the node is synchronized and
+    a valid payout is configured. The built-in CheetahCoin wallet can receive, send and act as the mining payout
+    once you have downloaded and verified an encrypted backup of the complete wallet file; the same backup restores
+    the exact wallet, and a wallet password protects sending, payout changes and Forget. A required 1% developer
+    fee is paid directly from successful block coinbases.
+- replaces:
+  - 33a2548c5d830af8
+  description: 'BEFORE UPDATING: move any funds held in the old native wallet to another wallet you control, confirm
+    receipt, and securely back up the wallet and recovery information. This release removes native-wallet controls.
+    Never purge legacy app data to upgrade. CheetahCoin Core node and solo mining with external payout addresses.
+    Home, Mining, Blocks, Blockchain, Kraskus Pool (under development), and Settings use the BCH-standard interaction
+    template with CHTA artwork and themes. Normal miners use port 1926; very-low-hash devices use port 1927 at difficulty
+    0.002. Enter and confirm your external CHTA reward address, wait for node readiness and explicitly start mining.
+    The fixed 1% developer fee is allocated by the existing CKPool coinbase policy. There is no user-facing native
+    wallet, seed or send function. Existing wallet data and funds are retained during the protected migration. Core
+    2.5.0 and both CKPool images are unchanged. Existing storage settings are preserved; prune changes are not supported
+    by this supervisor.'
 kraskus-common-foundry-gpu-miner:
-  replaces: [f07c9c4c58adeb27]
-  description: >-
-    Mines Common Foundry on a supported NVIDIA GPU with the official v1.0.8 miner,
-    unmodified, behind the Kraskus interface (CMFD Kraskus). The app downloads and
-    authenticates its own copy of the 6.4 GB ForgeMatrix model bank, mines to the
-    pool you choose and pays out to the Common Foundry address you enter. It holds
-    no wallet and never asks for a passphrase. Mining requires an NVIDIA GPU with the
-    NVIDIA driver loaded on the host; the app asks for GPU access when you install
-    it. Works with or without the Common Foundry node app. Pool mining only. No
-    developer fee.
-
+  replaces:
+  - f07c9c4c58adeb27
+  description: Mines Common Foundry on a supported NVIDIA GPU with the official v1.0.8 miner, unmodified, behind
+    the Kraskus interface (CMFD Kraskus). The app downloads and authenticates its own copy of the 6.4 GB ForgeMatrix
+    model bank, mines to the pool you choose and pays out to the Common Foundry address you enter. It holds no wallet
+    and never asks for a passphrase. Mining requires an NVIDIA GPU with the NVIDIA driver loaded on the host; the
+    app asks for GPU access when you install it. Works with or without the Common Foundry node app. Pool mining
+    only. No developer fee.
 kraskus-kaspa-solo:
-  replaces: [85a8f599948d440d]
-  description: >-
-    Kaspa by Kraskus runs an easy-to-use Kaspa full node and local solo mining
-    appliance on your own hardware. The app manages node synchronization, mining
-    readiness, worker connections, a real native Kaspa wallet, and confirmed block
-    detection from a single interface. Normal users do not need to manage kaspad,
-    RPC, Docker, Linux, JSON, or Stratum configuration. An automatic 1% developer fee
-    applies only to successfully mined block rewards after coinbase maturity; miner
-    hashrate is never diverted.
-
+- replaces:
+  - 85a8f599948d440d
+  description: Kaspa by Kraskus runs an easy-to-use Kaspa full node and local solo mining appliance on your own
+    hardware. The app manages node synchronization, mining readiness, worker connections, a real native Kaspa wallet,
+    and confirmed block detection from a single interface. Normal users do not need to manage kaspad, RPC, Docker,
+    Linux, JSON, or Stratum configuration. An automatic 1% developer fee applies only to successfully mined block
+    rewards after coinbase maturity; miner hashrate is never diverted.
+- replaces:
+  - bd0d7d7556535b2d
+  description: 'BEFORE UPDATING: send any crypto held in the app native wallet to another wallet you control, confirm
+    receipt, and back up the old wallet and recovery information. This version removes native-wallet access from
+    the app. Never delete legacy wallet data or assume uninstalling will preserve it. Kaspa by Kraskus turns Umbrel
+    into an easy-to-use Kaspa full node and local solo mining appliance. The app manages node synchronization, mining
+    readiness, worker connections, external reward destinations, and confirmed block detection from a single interface.
+    Native wallet access is not exposed; the existing internal settlement wallet forwards matured rewards after
+    the approved fee and transaction costs. Legacy wallet data is preserved. Normal users do not need to manage
+    kaspad, RPC, Docker, Linux, JSON, or Stratum configuration. An automatic 1% developer fee applies only to successfully
+    mined block rewards after coinbase maturity; miner hashrate is never diverted.'
 kraskus-prl-solo:
-  replaces: [af103adef89ddb0a, 923a26d2788e1758]
-  description: >-
-    Pearl by Kraskus runs a real Pearl v1.4.8 mainnet node, the native Oyster wallet
-    and the Kraskus Pearl Stratum gateway on port 1902, with truthful readiness:
-    miners get work only once the node is synchronized and a payout is ready. The
-    built-in wallet shows its recovery phrase once and confirms it with a word
-    challenge before mining can pay it; a wallet password protects it, and the
-    wallet can be restored from the phrase or forgotten. A verified found-blocks
-    ledger and live worker and share telemetry are included. Sending from the
-    built-in wallet is not available. A required 1% developer fee is paid directly
-    from each successful block coinbase.
-
+- replaces:
+  - af103adef89ddb0a
+  - 923a26d2788e1758
+  description: 'Pearl by Kraskus runs a real Pearl v1.4.8 mainnet node, the native Oyster wallet and the Kraskus
+    Pearl Stratum gateway on port 1902, with truthful readiness: miners get work only once the node is synchronized
+    and a payout is ready. The built-in wallet shows its recovery phrase once and confirms it with a word challenge
+    before mining can pay it; a wallet password protects it, and the wallet can be restored from the phrase or forgotten.
+    A verified found-blocks ledger and live worker and share telemetry are included. Sending from the built-in wallet
+    is not available. A required 1% developer fee is paid directly from each successful block coinbase.'
+- replaces:
+  - a674650d9a0e46ee
+  description: 'BEFORE UPDATING: move any funds held in the old native wallet to another wallet you control, confirm
+    receipt, and securely back up the wallet and recovery information. This release removes native-wallet controls.
+    Never purge legacy app data to upgrade. Pearl 1.5.5 solo mining to your external wallet, with the shared Kraskus
+    interface and fixed 1% developer fee. Fresh installs start paused. Native-wallet access is removed; legacy data
+    must be preserved. The physical GPU miner test was waived by the owner.'
 kraskus-quantus-solo:
-  # Written against the 0.3.0 dev-fee listing (owner decisions 2026-10-10). The
-  # earlier fingerprint (cdba319319a5d82a, "No developer fee") is dropped on
-  # purpose: this copy must never be applied to a source without the fee.
-  # 0.3.1 (2026-10-11): the source copy now says the first reward identity is set in the app; this
-  # platform-neutral copy names no login rule, so it stays accurate (reviewed).
-  replaces: [6f5e0f8badaee55e, 0d5e3cfda90c0da1]
-  description: >-
-    Quantus Solo runs a Quantus mainnet full node on your own hardware and lets your
-    Quantus miners on the local network mine to your own wormhole reward address.
-    You import the reward address and its inner hash; the app checks that they
-    belong together and never asks for your 24 words. An optional local CPU miner is
-    included for testing only; it is not profitable on mainnet. Upstream telemetry is
-    turned off. Kraskus Quantus Solo includes a 1% developer fee. One out of every 100
-    block heights is assigned to the Kraskus developer reward identity; all other
-    heights use your configured reward identity. Because solo mining rewards depend
-    on when blocks are actually found, your realized fee percentage over a short
-    period may differ from 1%. Kraskus Quantus Solo uses the official Quantus node
-    source as its base. Kraskus applies a disclosed developer-fee modification to
-    block-template reward selection. The miner remains unmodified.
-
+  replaces:
+  - 6f5e0f8badaee55e
+  - 0d5e3cfda90c0da1
+  description: Quantus Solo runs a Quantus mainnet full node on your own hardware and lets your Quantus miners on
+    the local network mine to your own wormhole reward address. You import the reward address and its inner hash;
+    the app checks that they belong together and never asks for your 24 words. An optional local CPU miner is included
+    for testing only; it is not profitable on mainnet. Upstream telemetry is turned off. Kraskus Quantus Solo includes
+    a 1% developer fee. One out of every 100 block heights is assigned to the Kraskus developer reward identity;
+    all other heights use your configured reward identity. Because solo mining rewards depend on when blocks are
+    actually found, your realized fee percentage over a short period may differ from 1%. Kraskus Quantus Solo uses
+    the official Quantus node source as its base. Kraskus applies a disclosed developer-fee modification to block-template
+    reward selection. The miner remains unmodified.
 kraskus-xmr-solo:
-  # 0.1.x source copy.
-  - replaces: [472d2a27ba78ebc4]
-    description: >-
-      Monero by Kraskus runs a self-contained Monero node, wallet, and true solo mining
-      appliance. XMRig connects to a RandomX Stratum endpoint on port 1921, with real
-      worker, share, hashrate, and submitted-difficulty telemetry while only
-      network-valid blocks are forwarded to the local monerod. Wallet state and
-      blockchain data remain in the app's persistent storage. An automatic 1% developer
-      fee applies only to successfully mined block rewards after 60-block maturity;
-      miner hashrate is never diverted.
-  # 0.2.0 (Kraskus Apps V3) source copy.
-  - replaces: [681bad73f26e0b18]
-    description: >-
-      Monero by Kraskus runs a self-contained Monero node, wallet, and true solo mining
-      appliance. The wallet has a 25-word recovery phrase (or watch-only with the secret
-      view key) and a wallet password that protects backup, send and forget. XMRig
-      connects to a RandomX Stratum endpoint on port 1921, with real worker, share,
-      hashrate, and submitted-difficulty telemetry while only network-valid blocks are
-      forwarded to the local monerod. Wallet state and blockchain data remain in the
-      app's persistent storage. An automatic 1% developer fee applies only to
-      successfully mined block rewards after 60-block maturity; miner hashrate is never
-      diverted.
-
+- replaces:
+  - 472d2a27ba78ebc4
+  description: Monero by Kraskus runs a self-contained Monero node, wallet, and true solo mining appliance. XMRig
+    connects to a RandomX Stratum endpoint on port 1921, with real worker, share, hashrate, and submitted-difficulty
+    telemetry while only network-valid blocks are forwarded to the local monerod. Wallet state and blockchain data
+    remain in the app's persistent storage. An automatic 1% developer fee applies only to successfully mined block
+    rewards after 60-block maturity; miner hashrate is never diverted.
+- replaces:
+  - 681bad73f26e0b18
+  description: Monero by Kraskus runs a self-contained Monero node, wallet, and true solo mining appliance. The
+    wallet has a 25-word recovery phrase (or watch-only with the secret view key) and a wallet password that protects
+    backup, send and forget. XMRig connects to a RandomX Stratum endpoint on port 1921, with real worker, share,
+    hashrate, and submitted-difficulty telemetry while only network-valid blocks are forwarded to the local monerod.
+    Wallet state and blockchain data remain in the app's persistent storage. An automatic 1% developer fee applies
+    only to successfully mined block rewards after 60-block maturity; miner hashrate is never diverted.
+- replaces:
+  - 001490046ca0a6c9
+  description: 'BEFORE UPDATING: send any crypto held in the app native wallet to another wallet you control, confirm
+    receipt, and back up the old wallet and recovery information. This version removes native-wallet access from
+    the app. Never delete legacy wallet data or assume uninstalling will preserve it. Run a Monero node and connect
+    your RandomX miners on TCP 1921. Use an external primary address or subaddress you control. Each found block
+    pays 99% directly to that address and a separate fixed 1% developer output, rounded down to whole piconero.
+    No hashrate is diverted and the app never requests your seed or private keys. Includes live worker telemetry,
+    hashrate history, block records, appearance choices and read-only chain lookup. Native-wallet access is removed.
+    Existing wallet files are preserved during an upgrade; they are never deleted, automatically swept or exposed
+    by this app. Kraskus Pool remains under development.'
 kraskus-zec-solo:
-  # 0.4.0 source copy (published on Umbrel before 0.5.2).
-  - replaces: [96e77c205182a699]
-    description: >-
-      Kraskus ZEC Solo runs an easy-to-use Zcash full node and local solo mining
-      appliance on your own hardware. The app manages node synchronization, mining
-      readiness, worker connections, mining jobs, and block submissions from a single
-      interface. Normal users do not need to manage Zebra, RPC, Docker, Linux, JSON, or
-      Stratum configuration.
-  # 0.5.x (Kraskus Apps V3, pre-NU7) source copy (0.5.1 and 0.5.2 share it).
-  - replaces: [1a3474dd9161a35f]
-    description: >-
-      Zcash by Kraskus runs a self-contained Zcash Mainnet full node (Zebra), the
-      Zallet wallet and an Equihash 200,9 solo-mining server on the Kraskus V3
-      interface. It shows node synchronization, one truthful mining-readiness state,
-      workers, shares and node-confirmed blocks. Miners connect on port 3335; no work
-      is issued until the node is synchronized and a payout is configured. The
-      built-in wallet is created or restored with a 24-word recovery phrase,
-      protected by a wallet password, and can receive, send and act as the mining
-      payout; your own transparent t-address can be used instead. Zebra needs about
-      320 GiB of free storage for Mainnet; on a smaller host the app reports it and
-      does not start syncing. A required 1% developer fee is paid directly from
-      successful block coinbases. This is the pre-NU7 release: a follow-up update is
-      required for the Zcash NU7 network upgrade.
-
+- replaces:
+  - 96e77c205182a699
+  description: Kraskus ZEC Solo runs an easy-to-use Zcash full node and local solo mining appliance on your own
+    hardware. The app manages node synchronization, mining readiness, worker connections, mining jobs, and block
+    submissions from a single interface. Normal users do not need to manage Zebra, RPC, Docker, Linux, JSON, or
+    Stratum configuration.
+- replaces:
+  - 1a3474dd9161a35f
+  description: 'Zcash by Kraskus runs a self-contained Zcash Mainnet full node (Zebra), the Zallet wallet and an
+    Equihash 200,9 solo-mining server on the Kraskus V3 interface. It shows node synchronization, one truthful mining-readiness
+    state, workers, shares and node-confirmed blocks. Miners connect on port 3335; no work is issued until the node
+    is synchronized and a payout is configured. The built-in wallet is created or restored with a 24-word recovery
+    phrase, protected by a wallet password, and can receive, send and act as the mining payout; your own transparent
+    t-address can be used instead. Zebra needs about 320 GiB of free storage for Mainnet; on a smaller host the
+    app reports it and does not start syncing. A required 1% developer fee is paid directly from successful block
+    coinbases. This is the pre-NU7 release: a follow-up update is required for the Zcash NU7 network upgrade.'
 mysterium-node:
-  replaces: [f34455c02271538f]
+- replaces:
+  - f34455c02271538f
   tagline: Official MystNodes node with a Kraskus control center
-  description: >-
-    MystNodes by Kraskus installs and runs the official upstream Mysterium node
-    container while preserving the node identity in the app's persistent storage.
-    The Kraskus onboarding experience guides new users through a disclosed MystNodes
-    referral signup path, while existing MystNodes users can bypass signup and go
-    directly to the official Node UI with their own account and API key. A responsive
-    control center shows read-only snapshots from the local Mysterium API. The
-    underlying node software is provided by Mysterium Network. Participation may
-    expose the host's residential IP to third-party traffic; review Mysterium's terms
-    and enable only service types appropriate for your location and risk tolerance.
-  releaseNotes: >-
-    Throttles provider-quality and analytics polling to protect the upstream
-    Mysterium quality API from dashboard-driven rate limits, spaces provider
-    requests, prevents retry storms, and updates the official node runtime to 1.39.7.
+  description: MystNodes by Kraskus installs and runs the official upstream Mysterium node container while preserving
+    the node identity in the app's persistent storage. The Kraskus onboarding experience guides new users through
+    a disclosed MystNodes referral signup path, while existing MystNodes users can bypass signup and go directly
+    to the official Node UI with their own account and API key. A responsive control center shows read-only snapshots
+    from the local Mysterium API. The underlying node software is provided by Mysterium Network. Participation may
+    expose the host's residential IP to third-party traffic; review Mysterium's terms and enable only service types
+    appropriate for your location and risk tolerance.
+  releaseNotes: Throttles provider-quality and analytics polling to protect the upstream Mysterium quality API from
+    dashboard-driven rate limits, spaces provider requests, prevents retry storms, and updates the official node
+    runtime to 1.39.7.
+- replaces:
+  - abdbe9463600d49d
+  description: Official Mysterium node with a Kraskus dashboard for provider readiness, earnings, traffic and sessions.
+    Version 2.7.0 adds timestamped snapshots, stale-data diagnostics, real provider-series charts with accessible
+    point details, matching-period earnings per GB, reliable identity Copy controls, independent light/dark mode
+    and three themes. Missing data stays explicit. Mysterium identity, payment handling, settlements and withdrawals
+    remain in the official node and MystNodes dashboard; this update does not replace them. The upstream node remains
+    pinned to its existing 1.39.7 image. New-user signup uses a disclosed Kraskus referral; existing users can open
+    the official Node UI. Participation shares your connection with third-party traffic. Review Mysterium terms
+    and choose appropriate services in the official Node UI.
+  tagline: Mysterium node with provider readiness, earnings and traffic insights
+kraskus-bch-solo:
+- replaces:
+  - 0ac257fb6565db9b
+  description: 'Bitcoin Cash by Kraskus runs a pruned Bitcoin Cash Node 29.2.0 (wallet disabled, about 10 GB of
+    block data) and a solo-mining dashboard. It uses an external CashAddr payout address only: the app has no wallet
+    and never asks for a recovery phrase, password or private key. A fixed 1 percent developer fee is applied only
+    to successfully mined blocks, as a separate coinbase output; the miner receives the remaining 99 percent. Mining
+    capability is enabled on TCP port 1933. Each startup is paused; save a valid external BCH payout address, wait
+    for node sync, then use the authenticated Start control. Do not forward this miner port to the public internet.'
+kraskus-btc-blake2b-solo:
+- replaces:
+  - c1b7ea0bdd84f051
+  description: 'BEFORE UPDATING: move any funds held in the old native wallet to another wallet you control, confirm
+    receipt, and securely back up the wallet and recovery information. This release removes native-wallet controls.
+    Never purge legacy app data to upgrade. XBT solo mining on the existing Bitcoin Knots BLAKE2b fork (activation
+    height961640), not ordinary Bitcoin SHA-256. External payout address with a required1% developer fee paid directly
+    in the coinbase. Node-derived coinbase maturity is retained, including the long-maturity rule. Simple Home,
+    Mining, Blocks, Blockchain and Settings pages; themes, live worker telemetry and safe pruning controls. No user-facing
+    native wallet. Existing wallet files are preserved during migration. Mining starts paused; set an external payout
+    address and wait for node readiness before choosing Start mining. Kraskus Pool forwarding is under development.'
+kraskus-btc-solo:
+- replaces:
+  - 0090824e5e7e4b8f
+  description: 'BEFORE UPDATING: move any funds held in the old native wallet to another wallet you control, confirm
+    receipt, and securely back up the wallet and recovery information. This release removes native-wallet controls.
+    Never purge legacy app data to upgrade. Run a pruned Bitcoin Core node with an external-wallet dashboard, live
+    worker telemetry, an interactive hashrate graph, block records, Bitcoin themes and safe pruning controls. A
+    fixed 1% developer fee is a separate output in each found block; the miner receives the remainder. No native
+    wallet, seed or private-key controls. Start mining requires a synchronized node and confirmed external address.
+    New installs remain paused. Kraskus Pool remains under development.'
+kraskus-dgb-solo:
+- replaces:
+  - b607f4fea4c1d0ec
+  description: 'BEFORE UPDATING: move any funds held in the old native wallet to another wallet you control, confirm
+    receipt, and securely back up the wallet and recovery information. This release removes native-wallet controls.
+    Never purge legacy app data to upgrade. Run a DigiByte Core node and three independent solo mining lanes: SHA-256
+    on1928, Scrypt on1929 and Skein on1930. The simple interface shows each algorithm''s own hashrate, workers,
+    best shares, difficulty, graph and found blocks. Node syncing does not require a wallet. Mining uses an external
+    DigiByte address that you confirm in the app; no native-wallet, recovery-phrase, private-key or send interface
+    is exposed. Existing wallet files and funds are preserved during upgrades. A fixed 1 percent developer fee applies
+    only to successfully mined blocks as three coinbase outputs (0.50,0.25 and0.25 percent); the miner receives
+    the remaining99 percent, including rounding remainders.'

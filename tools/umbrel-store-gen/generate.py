@@ -32,11 +32,11 @@ import tarfile
 
 import yaml
 
-GENERATOR_VERSION = "1.0.0"
-KRASKUS = "D:/Kraskus"
+GENERATOR_VERSION = "1.1.0"
+KRASKUS = os.environ.get("KRASKUS_SOURCE_ROOT", os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 SOURCES = {
-    "main": ("Kraskus-Crypto-Store", f"{KRASKUS}/Kraskus-Crypto-Store"),
-    "dev": ("Kraskus-Crypto-Dev-Store", f"{KRASKUS}/Kraskus-Crypto-Dev-Store"),
+    "main": ("Kraskus-Crypto-Store", os.environ.get("KRASKUS_MAIN_SOURCE", f"{KRASKUS}/Kraskus-Crypto-Store")),
+    "dev": ("Kraskus-Crypto-Dev-Store", os.environ.get("KRASKUS_DEV_SOURCE", f"{KRASKUS}/Kraskus-Crypto-Dev-Store")),
 }
 SOURCE_REF = "origin/main"
 
@@ -61,7 +61,7 @@ GPU_APPS = {"kraskus-common-foundry-gpu-miner"}
 # Monero by Kraskus 0.2.0 (its first V3 version, owner decisions 2026-10-13/14):
 # the UI port 33065 goes; P2P 18080/tcp and Stratum 1921/tcp stay published. No
 # deployment declaration (no PLATFORM_AUTHENTICATED routes, as DGB and BSV).
-UNPUBLISHED_UI_APPS = {"kraskus-kaspa-solo": (0, 4, 0), "kraskus-bsv-solo": (0, 5, 0), "kraskus-prl-solo": (0, 5, 0),
+UNPUBLISHED_UI_APPS = {"kraskus-btc-solo": (0, 5, 6), "kraskus-bch-solo": (0, 5, 12), "kraskus-btc-blake2b-solo": (0, 3, 3), "mysterium-node": (2, 7, 0), "kraskus-kaspa-solo": (0, 4, 0), "kraskus-bsv-solo": (0, 5, 0), "kraskus-prl-solo": (0, 5, 0),
                        "kraskus-chta-solo": (0, 5, 0), "kraskus-quantus-solo": (0, 3, 0),
                        "kraskus-zec-solo": (0, 5, 0), "kraskus-dgb-solo": (0, 2, 0),
                        "kraskus-xmr-solo": (0, 2, 0)}
@@ -243,6 +243,21 @@ def version_tuple(value):
         return ()
 
 
+def port_target_matches(port, target):
+    if isinstance(port, dict):
+        return str(port.get("target")) == str(target) and port.get("protocol", "tcp") == "tcp"
+    return str(port).split("/")[0].endswith(":%s" % target)
+
+
+def ui_target(data):
+    proxy = data.get("x-5tratumos-secure-proxy") or {}
+    if proxy.get("ui_service"):
+        return proxy["ui_service"], proxy.get("ui_port")
+    env = data.get("services", {}).get("app_proxy", {}).get("environment", {})
+    if isinstance(env, list):env=dict(item.split("=",1) for item in env)
+    return env.get("APP_HOST"), env.get("APP_PORT")
+
+
 def unpublish_ui_port(compose_text, app):
     """Remove the UI service's `ports:` block (the x-5tratumos-secure-proxy ui_service).
 
@@ -250,10 +265,15 @@ def unpublish_ui_port(compose_text, app):
     the caller verifies the parsed result differs only by that block.
     """
     data = yaml.safe_load(compose_text)
-    proxy = data.get("x-5tratumos-secure-proxy") or {}
-    ui, ui_port = proxy.get("ui_service"), proxy.get("ui_port")
+    ui, ui_port = ui_target(data)
     if not ui or ui not in data.get("services", {}):
         raise SystemExit(f"{app}: no x-5tratumos-secure-proxy ui_service to unpublish")
+    if compose_text.lstrip().startswith("{"):
+        ports = data["services"][ui].get("ports") or []
+        if len(ports) != 1 or not port_target_matches(ports[0], ui_port):
+            raise SystemExit(f"{app}: UI publishes more than its declared UI port: {ports}")
+        data["services"][ui].pop("ports")
+        return json.dumps(data, indent=2) + "\n"
     lines = compose_text.split("\n")
     out, i, removed, in_ui = [], 0, 0, False
     while i < len(lines):
@@ -262,7 +282,7 @@ def unpublish_ui_port(compose_text, app):
         indent = len(line) - len(line.lstrip())
         if indent == 2 and stripped.endswith(":") and not stripped.startswith("#"):
             in_ui = stripped[:-1] == ui
-        if in_ui and indent == 4 and stripped == "ports:":
+        if in_ui and indent == 4 and stripped.startswith("ports:"):
             j = i + 1
             while j < len(lines) and (not lines[j].strip() or len(lines[j]) - len(lines[j].lstrip()) > 4
                                       or lines[j].lstrip().startswith("- ")):
@@ -281,14 +301,14 @@ def unpublish_ui_port(compose_text, app):
     if removed != 1:
         raise SystemExit(f"{app}: expected exactly one ports block on UI service {ui}, found {removed}")
     ports = data["services"][ui].get("ports") or []
-    if len(ports) != 1 or not str(ports[0]).split("/")[0].endswith(":%s" % ui_port):
+    if len(ports) != 1 or not port_target_matches(ports[0], ui_port):
         raise SystemExit(f"{app}: UI service {ui} publishes more than its UI port: {ports}")
     return "\n".join(out)
 
 
 def check_ui_unpublish(before, after, app):
     b, a = yaml.safe_load(before), yaml.safe_load(after)
-    ui = b["x-5tratumos-secure-proxy"]["ui_service"]
+    ui, _ = ui_target(b)
     b["services"][ui].pop("ports")
     assert a == b, f"{app}: compose changed beyond the UI service's ports"
 
@@ -412,12 +432,17 @@ def check_gpu_strip(before, after, app):
     assert a == b, f"{app}: compose changed beyond the NVIDIA reservation"
 
 
-def main(out_root):
-    commits = {ch: git(path, "rev-parse", SOURCE_REF).strip() for ch, (_, path) in SOURCES.items()}
+def main(out_root, selected=None):
+    selected = set(selected or STORES)
+    unknown = selected - set(STORES)
+    if unknown:raise SystemExit(f"Unknown stores: {sorted(unknown)}")
+    channels = {STORES[name][2] for name in selected}
+    commits = {ch: git(path, "rev-parse", SOURCE_REF).strip() for ch, (_, path) in SOURCES.items() if ch in channels}
     overrides = load_overrides()
     holds = load_holds()
     report = {}
     for store_repo, (store_id, store_name, channel, wanted) in STORES.items():
+        if store_repo not in selected:continue
         source_name, source_path = SOURCES[channel]
         commit = commits[channel]
         root = os.path.join(out_root, store_repo)
@@ -475,4 +500,9 @@ def main(out_root):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    import argparse
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("output_root")
+    parser.add_argument("--stores",nargs="+",choices=sorted(STORES),default=list(STORES))
+    args=parser.parse_args()
+    main(args.output_root,args.stores)
