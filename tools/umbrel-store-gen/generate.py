@@ -32,7 +32,7 @@ import tarfile
 
 import yaml
 
-GENERATOR_VERSION = "1.1.0"
+GENERATOR_VERSION = "1.1.1"
 KRASKUS = os.environ.get("KRASKUS_SOURCE_ROOT", os.path.abspath(os.path.join(os.path.dirname(__file__), "../../..")))
 SOURCES = {
     "main": ("Kraskus-Crypto-Store", os.environ.get("KRASKUS_MAIN_SOURCE", f"{KRASKUS}/Kraskus-Crypto-Store")),
@@ -338,6 +338,9 @@ def declare_umbrel_deployment(compose_text, app, service):
     env = svc.get("environment")
     if not env or not isinstance(env, (dict, list)):
         raise SystemExit(f"{app}: deployment service {service} has no environment block to declare the deployment in")
+    if compose_text.lstrip().startswith("{"):
+        svc["environment"][PLATFORM_ENV] = UMBREL_DEPLOYMENT
+        return json.dumps(data, indent=2) + "\n"
     lines = compose_text.split("\n")
     out, i, inserted, in_svc = [], 0, 0, False
     while i < len(lines):
@@ -401,6 +404,14 @@ def umbrel_compose(app, version, compose_text, gpu=False):
     Refuses a source that already contains the deployment declaration; then the
     GPU strip, the UI-port removal and the deployment declaration, each checked.
     """
+    bsv_external = app == "kraskus-bsv-solo" and version_tuple(version) >= (0, 6, 0)
+    if bsv_external:
+        data = yaml.safe_load(compose_text)
+        env = data["services"]["api"]["environment"]
+        if env.get(PLATFORM_ENV) != "5tratumos":
+            raise SystemExit(f"{app}: expected explicit 5tratumos mode on api")
+        del env[PLATFORM_ENV]
+        compose_text = json.dumps(data, indent=2) + "\n"
     refuse_platform_declaration(compose_text, app)
     text = compose_text
     if gpu:
@@ -414,7 +425,7 @@ def umbrel_compose(app, version, compose_text, gpu=False):
         after = unpublish_ui_port(text, app)
         check_ui_unpublish(text, after, app)
         text = after
-        deployment_service = UMBREL_DEPLOYMENT_SERVICES.get(app)
+        deployment_service = "api" if bsv_external else UMBREL_DEPLOYMENT_SERVICES.get(app)
         if deployment_service:
             after = declare_umbrel_deployment(text, app, deployment_service)
             check_umbrel_deployment(text, after, app, deployment_service)
