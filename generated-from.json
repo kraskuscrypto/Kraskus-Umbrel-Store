@@ -2,18 +2,18 @@
   "generator": "1.1.1",
   "source_repo": "kraskuscrypto/Kraskus-Crypto-Store",
   "source_ref": "origin/main",
-  "source_commit": "10c84c8bea9a63e06aedbd8c98e289b151b67349",
+  "source_commit": "b4bec976ef7bb70895126270456fca660d16372b",
   "store_id": "kraskus",
   "apps": [
     {
       "id": "kraskus-bch-solo",
-      "version": "0.5.12",
+      "version": "0.5.13",
       "gpu": false,
       "ui_unpublished": true
     },
     {
       "id": "kraskus-bsv-solo",
-      "version": "0.6.3",
+      "version": "0.6.4",
       "gpu": false,
       "ui_unpublished": true,
       "umbrel_deployment": {
@@ -23,49 +23,49 @@
     },
     {
       "id": "kraskus-btc-blake2b-solo",
-      "version": "0.3.3",
+      "version": "0.3.4",
       "gpu": false,
       "ui_unpublished": true
     },
     {
       "id": "kraskus-btc-solo",
-      "version": "0.5.6",
+      "version": "0.5.7",
       "gpu": false,
       "ui_unpublished": true
     },
     {
       "id": "kraskus-chta-solo",
-      "version": "0.6.2",
+      "version": "0.6.3",
       "gpu": false,
       "ui_unpublished": true
     },
     {
       "id": "kraskus-dgb-solo",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "gpu": false,
       "ui_unpublished": true
     },
     {
       "id": "kraskus-kaspa-solo",
-      "version": "0.5.4",
+      "version": "0.5.5",
       "gpu": false,
       "ui_unpublished": true
     },
     {
       "id": "kraskus-prl-solo",
-      "version": "0.6.4",
+      "version": "0.6.5",
       "gpu": false,
       "ui_unpublished": true
     },
     {
       "id": "kraskus-xmr-solo",
-      "version": "0.3.5",
+      "version": "0.3.6",
       "gpu": false,
       "ui_unpublished": true
     },
     {
       "id": "kraskus-zec-solo",
-      "version": "0.6.1",
+      "version": "0.6.2",
       "gpu": false,
       "ui_unpublished": true
     }
