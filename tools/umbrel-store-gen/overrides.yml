@@ -1,5 +1,6 @@
+# Reviewed platform-neutral listing variants; versions, fees, warnings and destinations come from Main.
 kraskus-bsv-solo:
-  replaces:
+- replaces:
   - d673bfc20e818520
   description: Bitcoin SV runs a self-contained BSV mainnet node (SV Node 1.2.2, pruned, 10 GB excessive block size)
     and a native GMC-to-Stratum V1 solo-mining controller on port 1922. The Kraskus interface shows node synchronization,
@@ -10,6 +11,15 @@ kraskus-bsv-solo:
     install. A wallet password set at the end of wallet set-up protects backups, Forget and payout changes. Sending
     from the built-in wallet is not available. A required 1% developer fee is paid directly from each successful
     block coinbase. Even pruned, the Bitcoin SV node needs several hundred GB of disk (about 650 GB today).
+- replaces:
+  - 289dfe242a8f451c
+  description: 'BEFORE UPDATING FROM A NATIVE-WALLET RELEASE: send all holdings to a wallet you control and keep
+    a verified recovery backup. Native-wallet controls are removed. Never delete legacy wallet data. Bitcoin SV
+    mainnet node and solo Stratum controller, with external payout address and a required1% developer fee paid directly
+    in the coinbase. SV Node1.2.2 and the existing chain configuration are retained. Simple Home, Mining, Blocks,
+    Blockchain and Settings pages; themes, live worker telemetry and safe pruning controls. No user-facing native
+    wallet. Existing wallet files are preserved during migration. Mining starts paused; set an external payout address
+    and wait for node readiness before choosing Start mining. Kraskus Pool forwarding is under development. '
 kraskus-chta-solo:
 - replaces:
   - e6d60d2983b5ef87
@@ -145,6 +155,17 @@ kraskus-zec-solo:
     t-address can be used instead. Zebra needs about 320 GiB of free storage for Mainnet; on a smaller host the
     app reports it and does not start syncing. A required 1% developer fee is paid directly from successful block
     coinbases. This is the pre-NU7 release: a follow-up update is required for the Zcash NU7 network upgrade.'
+- replaces:
+  - efc02ef30de25476
+  description: 'BEFORE UPDATING FROM A NATIVE-WALLET RELEASE: send all holdings to a wallet you control and keep
+    a verified recovery backup. Native-wallet controls are removed. Never delete legacy wallet data. Run a Zcash
+    node and solo mine to your external wallet. Monitor synchronization, workers, solution rate and found blocks
+    in a simple dashboard. Connect Equihash (200,9) miners on port 3335. Mining stays paused until you enter and
+    confirm a transparent P2PKH (t1) payout address and explicitly start it. The fixed 1% developer fee applies
+    to the miner-controlled reward; required network allocations are unchanged. There is no built-in wallet, seed
+    prompt, send function or automatic shielding. Existing wallet files and funds are preserved through the protected
+    migration. The existing 320 GiB Mainnet storage preflight and pre-NU7 compatibility limits remain enforced;
+    this release does not update the node or add pruning. Kraskus Pool remains under development.'
 mysterium-node:
 - replaces:
   - f34455c02271538f

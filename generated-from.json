@@ -1,8 +1,8 @@
 {
-  "generator": "1.1.0",
+  "generator": "1.1.1",
   "source_repo": "kraskuscrypto/Kraskus-Crypto-Store",
   "source_ref": "origin/main",
-  "source_commit": "75f4ddb222cef89bbd622eb358ba193f9a955622",
+  "source_commit": "10c84c8bea9a63e06aedbd8c98e289b151b67349",
   "store_id": "kraskus",
   "apps": [
     {
@@ -13,9 +13,13 @@
     },
     {
       "id": "kraskus-bsv-solo",
-      "version": "0.5.3",
+      "version": "0.6.3",
       "gpu": false,
-      "ui_unpublished": true
+      "ui_unpublished": true,
+      "umbrel_deployment": {
+        "service": "api",
+        "KRASKUS_PLATFORM": "umbrel"
+      }
     },
     {
       "id": "kraskus-btc-blake2b-solo",
@@ -61,7 +65,7 @@
     },
     {
       "id": "kraskus-zec-solo",
-      "version": "0.5.2",
+      "version": "0.6.1",
       "gpu": false,
       "ui_unpublished": true
     }

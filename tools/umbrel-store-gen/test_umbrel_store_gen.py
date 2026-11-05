@@ -459,5 +459,35 @@ class ComposeVariableValidation(unittest.TestCase):
     def test_unescaped_unknown_variables_are_still_rejected(self):
         self.assertEqual(validate.unknown_umbrel_variables('$${RPC_USER} ${MISSING}'),{'MISSING'})
 
+class BsvExternalDeploymentTests(unittest.TestCase):
+    def fixture(self):
+        import json
+        data = yaml.safe_load(SOURCE)
+        data["services"]["api"] = data["services"].pop("adapter")
+        data["services"]["api"]["environment"]["KRASKUS_PLATFORM"] = "5tratumos"
+        return data
+
+    def test_bsv_json_declares_only_private_api(self):
+        import json
+        data = self.fixture()
+        text, _, service = generate.umbrel_compose("kraskus-bsv-solo", "0.6.3", json.dumps(data))
+        expected = self.fixture()
+        expected["services"]["ui"].pop("ports")
+        expected["services"]["api"]["environment"]["KRASKUS_PLATFORM"] = "umbrel"
+        self.assertEqual(yaml.safe_load(text), expected)
+        self.assertEqual(service, "api")
+
+    def test_bsv_public_api_refused(self):
+        import json
+        data = self.fixture(); data["services"]["api"]["ports"] = ["18422:18422"]
+        with self.assertRaises(SystemExit):
+            generate.umbrel_compose("kraskus-bsv-solo", "0.6.3", json.dumps(data))
+
+    def test_bsv_unexpected_platform_refused(self):
+        import json
+        data = self.fixture(); data["services"]["api"]["environment"]["KRASKUS_PLATFORM"] = "umbrel"
+        with self.assertRaises(SystemExit):
+            generate.umbrel_compose("kraskus-bsv-solo", "0.6.3", json.dumps(data))
+
 if __name__ == "__main__":
     unittest.main()
