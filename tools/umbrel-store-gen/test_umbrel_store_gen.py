@@ -404,5 +404,60 @@ class HoldsTest(unittest.TestCase):
         self.assertEqual({a for h in holds.values() for a in h}, set())
 
 
+
+class CurrentRecipeFormats(unittest.TestCase):
+    def check_format(self, text, app='kraskus-btc-solo', version='0.5.6'):
+        before=yaml.safe_load(text)
+        after, unpublished, deployment=generate.umbrel_compose(app,version,text)
+        parsed=yaml.safe_load(after)
+        expected=yaml.safe_load(text);ui,_=generate.ui_target(expected);expected['services'][ui].pop('ports')
+        self.assertEqual(parsed,expected)
+        self.assertTrue(unpublished)
+        self.assertEqual(parsed['services']['api']['ports'],before['services']['api']['ports'])
+        self.assertEqual(parsed['services']['node'],before['services']['node'])
+        self.assertIsNone(deployment)
+    def test_inline_yaml_ui_port(self):
+        self.check_format('''services:
+  app_proxy:
+    environment: {APP_HOST: ui, APP_PORT: 8080}
+  api:
+    ports: ['1932:1932/tcp']
+  node:
+    image: preserved
+    volumes: ['${APP_DATA_DIR}/node:/node']
+  ui:
+    image: unchanged
+    ports: ['127.0.0.1:33079:8080/tcp']
+''')
+    def test_json_and_long_port_mapping(self):
+        import json
+        source={'services':{'app_proxy':{'environment':{'APP_HOST':'ui','APP_PORT':8080}},'api':{'ports':['1932:1932/tcp']},'node':{'image':'preserved','volumes':['${APP_DATA_DIR}/node:/node']},'ui':{'image':'unchanged','ports':[{'target':8080,'published':'33079','host_ip':'127.0.0.1','protocol':'tcp'}]}}}
+        self.check_format(json.dumps(source,indent=2))
+    def test_refuses_multiple_ui_ports(self):
+        import json
+        source={'services':{'app_proxy':{'environment':{'APP_HOST':'ui','APP_PORT':8080}},'ui':{'ports':['33079:8080','9999:9999']}}}
+        with self.assertRaises(SystemExit):generate.unpublish_ui_port(json.dumps(source),'kraskus-btc-solo')
+    def test_mystnodes_resolves_proxy_without_platform_extension(self):
+        self.check_format('''services:
+  app_proxy:
+    environment: {APP_HOST: portal, APP_PORT: 80}
+  api:
+    ports: []
+  node:
+    image: preserved
+    network_mode: host
+  portal:
+    image: unchanged
+    ports: ['0.0.0.0:33060:80']
+''','mysterium-node','2.7.0')
+
+class ComposeVariableValidation(unittest.TestCase):
+    def test_defaults_do_not_require_an_umbrel_export(self):
+        self.assertEqual(validate.unknown_umbrel_variables('${BCH_STRATUM_BIND_IP:-0.0.0.0}:1933:1933 ${APP_DATA_DIR}/state'),set())
+    def test_escaped_shell_variables_are_not_platform_exports(self):
+        self.assertEqual(validate.unknown_umbrel_variables('exec command $${RPC_USER} $$RPC_PASS'),set())
+    def test_unescaped_unknown_variables_are_still_rejected(self):
+        self.assertEqual(validate.unknown_umbrel_variables('$${RPC_USER} ${MISSING}'),{'MISSING'})
+
 if __name__ == "__main__":
     unittest.main()
